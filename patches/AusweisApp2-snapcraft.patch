@@ -1,0 +1,328 @@
+diff -upNr AusweisApp2-1.14.3/cmake/DefaultFiles.cmake AusweisApp2-fork/cmake/DefaultFiles.cmake
+--- AusweisApp2-1.14.3/cmake/DefaultFiles.cmake	2018-07-05 15:20:15.000000000 +0200
++++ AusweisApp2-fork/cmake/DefaultFiles.cmake	2019-01-01 18:41:50.304940971 +0100
+@@ -23,5 +23,7 @@ FUNCTION(CONFIGURE_DEFAULT_FILES _destin
+ 	CONFIGURE_FILE(${RESOURCES_DIR}/config.json.in ${_destination}/config.json @ONLY)
+ 
+ 	# Copy qtlogging.ini file
+-	CONFIGURE_FILE(${RESOURCES_DIR}/qtlogging.ini ${_destination}/qtlogging.ini COPYONLY)
++	IF(NOT ${CMAKE_BUILD_TYPE} STREQUAL "RELEASE")
++		CONFIGURE_FILE(${RESOURCES_DIR}/qtlogging.ini ${_destination}/qtlogging.ini COPYONLY)
++	ENDIF()
+ ENDFUNCTION()
+diff -upNr AusweisApp2-1.14.3/cmake/Install.cmake AusweisApp2-fork/cmake/Install.cmake
+--- AusweisApp2-1.14.3/cmake/Install.cmake	2018-07-05 15:20:15.000000000 +0200
++++ AusweisApp2-fork/cmake/Install.cmake	2019-01-01 18:41:50.304940971 +0100
+@@ -3,7 +3,7 @@
+ # It will be included by ./src/CMakeLists.txt
+ ################################################
+ 
+-SET(TRANSLATION_DESTINATION translations)
++SET(TRANSLATION_DESTINATION share/qt5/translations)
+ SET(DEFAULT_FILE_DESTINATION .)
+ 
+ IF(CMAKE_PREFIX_PATH)
+@@ -172,7 +172,7 @@ ELSEIF(UNIX)
+ 
+ 	CONFIGURE_FILE(${PACKAGING_DIR}/linux/AusweisApp2.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/AusweisApp2.desktop @ONLY)
+ 	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/AusweisApp2.desktop DESTINATION share/applications COMPONENT Application)
+-	#INSTALL(FILES ${RESOURCES_DIR}/images/AusweisApp2.svg DESTINATION share/icons/hicolor/scalable/apps COMPONENT Application)
++	INSTALL(FILES ${RESOURCES_DIR}/images/npa.svg DESTINATION share/icons/hicolor/scalable/apps COMPONENT Application)
+ ENDIF()
+ 
+ 
+@@ -215,11 +215,12 @@ ELSE()
+ ENDIF()
+ 
+ # resources file
+-INSTALL(FILES ${RCC} DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)
++INSTALL(FILES ${RCC} DESTINATION share/AusweisApp2 COMPONENT Runtime)
+ 
+ # secure storage file
+-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.json DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)
++INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.json DESTINATION share/AusweisApp2 COMPONENT Runtime)
+ 
+ # qtlogging.ini
+-INSTALL(FILES ${RESOURCES_DIR}/qtlogging.ini DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)
+-
++IF(NOT ${CMAKE_BUILD_TYPE} STREQUAL "RELEASE")
++	INSTALL(FILES ${RESOURCES_DIR}/qtlogging.ini DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)
++ENDIF()
+diff -upNr AusweisApp2-1.14.3/CMakeLists.txt AusweisApp2-fork/CMakeLists.txt
+--- AusweisApp2-1.14.3/CMakeLists.txt	2018-07-05 15:20:15.000000000 +0200
++++ AusweisApp2-fork/CMakeLists.txt	2019-01-01 18:41:50.304940971 +0100
+@@ -24,6 +24,10 @@ IF(POLICY CMP0071)
+ 	CMAKE_POLICY(SET CMP0071 NEW)
+ ENDIF()
+ 
++IF(POLICY CMP0074)
++	CMAKE_POLICY(SET CMP0074 NEW)
++ENDIF()
++
+ # "tools.only" can be defined to disable the normal build and enable
+ # cmdline "tools" only. For example: "make format" or "make package_source"
+ IF(tools.only)
+@@ -100,6 +104,11 @@ IF(NOT ${CMAKE_BUILD_TYPE} STREQUAL "DEB
+ 	MESSAGE(FATAL_ERROR "CMAKE_BUILD_TYPE is invalid! Available options: RELEASE, DEBUG")
+ ENDIF()
+ 
++IF(${CMAKE_BUILD_TYPE} STREQUAL "RELEASE")
++	ADD_DEFINITIONS(-DQT_NO_DEBUG)
++	ADD_DEFINITIONS(-DQT_NO_DEBUG_OUTPUT)
++ENDIF()
++
+ SET(CMAKE_AUTOMOC ON)
+ SET(CMAKE_AUTOUIC ON)
+ SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+diff -upNr AusweisApp2-1.14.3/resources/packaging/linux/AusweisApp2.desktop.in AusweisApp2-fork/resources/packaging/linux/AusweisApp2.desktop.in
+--- AusweisApp2-1.14.3/resources/packaging/linux/AusweisApp2.desktop.in	2018-07-05 15:20:16.000000000 +0200
++++ AusweisApp2-fork/resources/packaging/linux/AusweisApp2.desktop.in	2019-01-01 18:41:50.332940934 +0100
+@@ -2,9 +2,10 @@
+ Version=1.0
+ Type=Application
+ Exec=@CMAKE_INSTALL_PREFIX@/bin/AusweisApp2
+-Icon=AusweisApp2
++Icon=npa
+ StartupNotify=true
+ Terminal=false
+-Categories=Network;Utility
++Categories=Utility;Accessibility;
++GenericName=Authentication App
+ Keywords=nPA,eID,eAT,Personalausweis,Aufenthaltstitel,Identity,Card
+ Name=AusweisApp2
+diff -upNr AusweisApp2-1.14.3/src/card/base/CardConnectionWorker.cpp AusweisApp2-fork/src/card/base/CardConnectionWorker.cpp
+--- AusweisApp2-1.14.3/src/card/base/CardConnectionWorker.cpp	2018-07-05 15:20:16.000000000 +0200
++++ AusweisApp2-fork/src/card/base/CardConnectionWorker.cpp	2019-01-01 18:41:50.348940913 +0100
+@@ -18,9 +18,9 @@ CardConnectionWorker::CardConnectionWork
+ 	, mReader(pReader)
+ 	, mSecureMessaging()
+ {
+-	connect(mReader, &Reader::fireCardInserted, this, &CardConnectionWorker::onReaderInfoChanged);
+-	connect(mReader, &Reader::fireCardRemoved, this, &CardConnectionWorker::onReaderInfoChanged);
+-	connect(mReader, &Reader::fireCardRetryCounterChanged, this, &CardConnectionWorker::onReaderInfoChanged);
++	connect(mReader.data(), &Reader::fireCardInserted, this, &CardConnectionWorker::onReaderInfoChanged);
++	connect(mReader.data(), &Reader::fireCardRemoved, this, &CardConnectionWorker::onReaderInfoChanged);
++	connect(mReader.data(), &Reader::fireCardRetryCounterChanged, this, &CardConnectionWorker::onReaderInfoChanged);
+ }
+ 
+ 
+diff -upNr AusweisApp2-1.14.3/src/card/base/command/BaseCardCommand.cpp AusweisApp2-fork/src/card/base/command/BaseCardCommand.cpp
+--- AusweisApp2-1.14.3/src/card/base/command/BaseCardCommand.cpp	2018-07-05 15:20:16.000000000 +0200
++++ AusweisApp2-fork/src/card/base/command/BaseCardCommand.cpp	2019-01-01 18:41:50.352940907 +0100
+@@ -39,7 +39,9 @@ void BaseCardCommand::execute()
+ 	Q_ASSERT(thread() == QThread::currentThread());
+ 
+ 	internalExecute();
+-	qDebug(card) << "ReturnCode of internal execute:" << mReturnCode;
++	#ifndef QT_NO_DEBUG_OUTPUT
++		qDebug(card) << "ReturnCode of internal execute:" << mReturnCode;
++	#endif // QT_NO_DEBUG_OUTPUT
+ 
+ 	QSharedPointer<BaseCardCommand> command(this, &QObject::deleteLater);
+ 	Q_EMIT commandDone(command);
+diff -upNr AusweisApp2-1.14.3/src/global/FileDestination.h AusweisApp2-fork/src/global/FileDestination.h
+--- AusweisApp2-1.14.3/src/global/FileDestination.h	2018-07-05 15:20:16.000000000 +0200
++++ AusweisApp2-fork/src/global/FileDestination.h	2019-01-01 18:41:50.364940892 +0100
+@@ -44,6 +44,23 @@ class FileDestination
+ 		}
+ 
+ 
++		static QString getPrefixPath()
++		{
++			QString prefixPath;
++
++			const auto libPathes = QCoreApplication::libraryPaths();
++			for (const auto& path : libPathes)
++			{
++				prefixPath = path;
++				prefixPath.remove(QString("/bin"));
++
++				if (prefixPath != path) {
++					break;
++				}
++			}
++
++			return prefixPath;
++		}
+ };
+ 
+ } /* namespace governikus */
+diff -upNr AusweisApp2-1.14.3/src/global/LanguageLoader.cpp AusweisApp2-fork/src/global/LanguageLoader.cpp
+--- AusweisApp2-1.14.3/src/global/LanguageLoader.cpp	2018-07-05 15:20:17.000000000 +0200
++++ AusweisApp2-fork/src/global/LanguageLoader.cpp	2019-01-01 18:41:50.364940892 +0100
+@@ -23,7 +23,7 @@ const QLocale::Language LanguageLoader::
+ QLocale LanguageLoader::mDefaultLanguage = QLocale::system();
+ 
+ LanguageLoader::LanguageLoader()
+-	: mPath(FileDestination::getPath("translations"))
++	: mPath("share/qt5/translations")
+ 	, mTranslatorList()
+ 	, mComponentList(
+ 		{
+@@ -31,6 +31,8 @@ LanguageLoader::LanguageLoader()
+ 		})
+ 	, mUsedLocale(mFallbackLanguage)
+ {
++
++	mPath = FileDestination::getPrefixPath() + "/" + mPath;
+ }
+ 
+ 
+@@ -132,6 +134,7 @@ void LanguageLoader::load(const QLocale&
+ 		return;
+ 	}
+ 
++
+ 	qCDebug(language) << "Use path:" << mPath;
+ 	bool loaded = false;
+ 
+diff -upNr AusweisApp2-1.14.3/src/global/ResourceLoader.cpp AusweisApp2-fork/src/global/ResourceLoader.cpp
+--- AusweisApp2-1.14.3/src/global/ResourceLoader.cpp	2018-07-05 15:20:17.000000000 +0200
++++ AusweisApp2-fork/src/global/ResourceLoader.cpp	2019-01-01 18:41:50.364940892 +0100
+@@ -42,7 +42,10 @@ void ResourceLoader::init()
+ {
+ 	for (const auto& file : mFilenames)
+ 	{
+-		QString path = FileDestination::getPath(file);
++
++		QString path = FileDestination::getPrefixPath() + "/share/AusweisApp2/" + file;
++
++		//QString path = FileDestination::getPath(file);
+ 
+ #ifndef QT_NO_DEBUG
+ 		const auto& filePathFromTestDir = QCoreApplication::applicationDirPath() + QStringLiteral("/../../src/") + file;
+diff -upNr AusweisApp2-1.14.3/src/qml/HistoryModel.cpp AusweisApp2-fork/src/qml/HistoryModel.cpp
+--- AusweisApp2-1.14.3/src/qml/HistoryModel.cpp	2018-07-05 15:20:16.000000000 +0200
++++ AusweisApp2-fork/src/qml/HistoryModel.cpp	2019-01-01 18:41:50.368940886 +0100
+@@ -119,8 +119,8 @@ HistoryModel::HistoryModel(HistorySettin
+ 	mFilterModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
+ 	mNameFilterModel.setSourceModel(this);
+ 	mHistoryModelSearchFilter.setSourceModel(this);
+-	connect(mHistorySettings, &HistorySettings::fireHistoryInfosChanged, this, &HistoryModel::onHistoryEntriesChanged);
+-	connect(mHistorySettings, &HistorySettings::fireEnabledChanged, this, &HistoryModel::fireEnabledChanged);
++	connect(mHistorySettings.data(), &HistorySettings::fireHistoryInfosChanged, this, &HistoryModel::onHistoryEntriesChanged);
++	connect(mHistorySettings.data(), &HistorySettings::fireEnabledChanged, this, &HistoryModel::fireEnabledChanged);
+ 	connect(Env::getSingleton<ProviderConfiguration>(), &ProviderConfiguration::fireUpdated, this, &HistoryModel::onProvidersChanged);
+ }
+ 
+@@ -366,9 +366,9 @@ bool HistoryModel::removeRows(int pRow,
+ 	entries.remove(pRow, pCount);
+ 
+ 	// disconnect the signal, otherwise this model gets reset
+-	disconnect(mHistorySettings, &HistorySettings::fireHistoryInfosChanged, this, &HistoryModel::onHistoryEntriesChanged);
++	disconnect(mHistorySettings.data(), &HistorySettings::fireHistoryInfosChanged, this, &HistoryModel::onHistoryEntriesChanged);
+ 	mHistorySettings->setHistoryInfos(entries);
+-	connect(mHistorySettings, &HistorySettings::fireHistoryInfosChanged, this, &HistoryModel::onHistoryEntriesChanged);
++	connect(mHistorySettings.data(), &HistorySettings::fireHistoryInfosChanged, this, &HistoryModel::onHistoryEntriesChanged);
+ 
+ 	mHistorySettings->save();
+ 
+diff -upNr AusweisApp2-1.14.3/src/secure_storage/SecureStorage.cpp AusweisApp2-fork/src/secure_storage/SecureStorage.cpp
+--- AusweisApp2-1.14.3/src/secure_storage/SecureStorage.cpp	2018-07-05 15:20:16.000000000 +0200
++++ AusweisApp2-fork/src/secure_storage/SecureStorage.cpp	2019-01-01 18:41:50.372940882 +0100
+@@ -91,7 +91,9 @@ SecureStorage& SecureStorage::getInstanc
+ 
+ void SecureStorage::load()
+ {
+-	const auto& path = FileDestination::getPath("config.json");
++
++	QString prefixPath = FileDestination::getPrefixPath();
++	const auto& path = prefixPath + "/share/AusweisApp2/config.json";
+ 
+ 	if (!QFile::exists(path))
+ 	{
+diff -upNr AusweisApp2-1.14.3/src/websocket/UIPlugInWebSocket.cpp AusweisApp2-fork/src/websocket/UIPlugInWebSocket.cpp
+--- AusweisApp2-1.14.3/src/websocket/UIPlugInWebSocket.cpp	2018-07-05 15:20:17.000000000 +0200
++++ AusweisApp2-fork/src/websocket/UIPlugInWebSocket.cpp	2019-01-01 18:41:50.372940882 +0100
+@@ -36,15 +36,19 @@ UIPlugInWebSocket::UIPlugInWebSocket()
+ 	mJsonApi = qobject_cast<UIPlugInJsonApi*>(UILoader::getInstance().getLoaded(UIPlugInName::UIPlugInJsonApi));
+ 	Q_ASSERT(mJsonApi);
+ 	connect(&mServer, &QWebSocketServer::newConnection, this, &UIPlugInWebSocket::onNewConnection);
+-	qDebug(websocket) << "Starting WebSocket..." << mServer.listen(QHostAddress::LocalHost, cWebSocketPort);
++	#ifndef QT_NO_DEBUG_OUTPUT
++		qDebug(websocket) << "Starting WebSocket..." << mServer.listen(QHostAddress::LocalHost, cWebSocketPort);
++	#endif // QT_NO_DEBUG_OUTPUT
+ 	if (!mServer.isListening())
+ 	{
+ 		qCritical(websocket) << mServer.errorString();
+ 		return;
+ 	}
+ 
+-	const quint16 port = mServer.serverPort();
+-	qDebug(websocket) << "Listening on port" << port;
++	#ifndef QT_NO_DEBUG_OUTPUT
++		const quint16 port = mServer.serverPort();
++		qDebug(websocket) << "Listening on port" << port;
++	#endif // QT_NO_DEBUG_OUTPUT
+ 
+ #ifndef QT_NO_DEBUG
+ 	if (cWebSocketPort == 0)
+@@ -54,7 +58,9 @@ UIPlugInWebSocket::UIPlugInWebSocket()
+ 		if (file.open(QIODevice::WriteOnly))
+ 		{
+ 			QTextStream(&file) << port;
+-			qDebug(websocket) << "Stored port number to info file" << path;
++			#ifndef QT_NO_DEBUG_OUTPUT
++				qDebug(websocket) << "Stored port number to info file" << path;
++			#endif // QT_NO_DEBUG_OUTPUT
+ 		}
+ 		else
+ 		{
+@@ -104,7 +110,9 @@ void UIPlugInWebSocket::onNewConnection(
+ 		auto connection = mServer.nextPendingConnection();
+ 		if (mConnection)
+ 		{
+-			qDebug(websocket) << "Client is already connected...";
++			#ifndef QT_NO_DEBUG_OUTPUT
++				qDebug(websocket) << "Client is already connected...";
++			#endif // QT_NO_DEBUG_OUTPUT
+ 			connection->close(QWebSocketProtocol::CloseCodePolicyViolated);
+ 			return;
+ 		}
+@@ -119,7 +127,9 @@ void UIPlugInWebSocket::onNewConnection(
+ 
+ void UIPlugInWebSocket::onClientDisconnected()
+ {
+-	qDebug(websocket) << "Client disconnected...";
++	#ifndef QT_NO_DEBUG_OUTPUT
++		qDebug(websocket) << "Client disconnected...";
++	#endif // QT_NO_DEBUG_OUTPUT
+ 
+ 	if (mContext)
+ 	{
+diff -upNr AusweisApp2-1.14.3/src/widget/DiagnosisGui.cpp AusweisApp2-fork/src/widget/DiagnosisGui.cpp
+--- AusweisApp2-1.14.3/src/widget/DiagnosisGui.cpp	2018-07-05 15:20:16.000000000 +0200
++++ AusweisApp2-fork/src/widget/DiagnosisGui.cpp	2019-01-01 18:41:50.372940882 +0100
+@@ -47,7 +47,7 @@ void DiagnosisGui::activate()
+ 
+ 	auto context = new DiagnosisContext();
+ 	mDialog = new DiagnosisDialog(context, dialogParent);
+-	connect(mDialog, &QDialog::finished, this, &DiagnosisGui::fireFinished);
++	connect(mDialog.data(), &QDialog::finished, this, &DiagnosisGui::fireFinished);
+ 	mDialog->show();
+ 
+ 	auto controller = new DiagnosisController(context, mDialog);
+diff -upNr AusweisApp2-1.14.3/src/widget/SetupAssistantGui.cpp AusweisApp2-fork/src/widget/SetupAssistantGui.cpp
+--- AusweisApp2-1.14.3/src/widget/SetupAssistantGui.cpp	2018-07-05 15:20:17.000000000 +0200
++++ AusweisApp2-fork/src/widget/SetupAssistantGui.cpp	2019-01-01 18:41:50.372940882 +0100
+@@ -36,7 +36,7 @@ void SetupAssistantGui::activate()
+ 		}
+ 
+ 		mWizard = new SetupAssistantWizard(dialogParent);
+-		connect(mWizard, &SetupAssistantWizard::fireChangePinButtonClicked, this, &SetupAssistantGui::fireChangePinButtonClicked);
++		connect(mWizard.data(), &SetupAssistantWizard::fireChangePinButtonClicked, this, &SetupAssistantGui::fireChangePinButtonClicked);
+ 	}
+ 
+ 	mWizard->exec();
+diff -upNr AusweisApp2-1.14.3/src/widget/step/StepChooseCardGui.cpp AusweisApp2-fork/src/widget/step/StepChooseCardGui.cpp
+--- AusweisApp2-1.14.3/src/widget/step/StepChooseCardGui.cpp	2018-07-05 15:20:17.000000000 +0200
++++ AusweisApp2-fork/src/widget/step/StepChooseCardGui.cpp	2019-01-01 18:41:50.376940876 +0100
+@@ -39,7 +39,7 @@ StepChooseCardGui::StepChooseCardGui(con
+ 	mDeviceButton = mInformationMessageBox->addButton(tr("Settings"), QMessageBox::YesRole);
+ 	mDeviceButton->setFocus();
+ 
+-	connect(mReaderDeviceGui, &ReaderDeviceGui::fireFinished, this, &StepChooseCardGui::onSubDialogFinished);
++	connect(mReaderDeviceGui.data(), &ReaderDeviceGui::fireFinished, this, &StepChooseCardGui::onSubDialogFinished);
+ }
+ 
+ 
