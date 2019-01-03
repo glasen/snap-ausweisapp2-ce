@@ -89,3 +89,4 @@ apps:
       - network
       - network-bind
       - home
+      - hardware-observe
