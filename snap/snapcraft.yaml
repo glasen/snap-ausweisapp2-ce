@@ -69,7 +69,6 @@ parts:
       - libpcsclite-dev
       - libudev-dev
       - libhttp-parser-dev
-      - icoutils
 
     stage-packages:
       - libqt5svg5
@@ -87,4 +86,6 @@ apps:
     plugs:
       - desktop
       - unity7
+      - network
       - network-bind
+      - home
