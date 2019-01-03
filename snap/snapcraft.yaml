@@ -1,4 +1,5 @@
 name: ausweisapp2-ce
+title: AusweisApp2 Community Edition
 version: '1.14.3'
 base: core18
 summary: AusweisApp2-CE - Tool for the german nPA (Community Edition)
@@ -22,9 +23,11 @@ description: |
 architectures: 
   - amd64
 
+licence : EUPL-1.1
+
 icon: snap/gui/icon.svg
 
-grade: stable
+grade: classic
 confinement: strict
 
 parts:
@@ -89,3 +92,5 @@ apps:
       - network
       - network-bind
       - home
+      - hardware-observe
+
