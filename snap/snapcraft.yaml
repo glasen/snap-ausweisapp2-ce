@@ -102,12 +102,11 @@ apps:
     desktop: usr/share/applications/AusweisApp2.desktop
 
     plugs:
-    - desktop
-    - unity7
-    - network
-    - network-bind
-    - home
-    - hardware-observe
-    - network-manager
-    - network-observe
-    - network-status
+      - desktop
+      - unity7
+      - network
+      - network-bind
+      - home
+      - hardware-observe
+      - network-manager
+      - network-observe
