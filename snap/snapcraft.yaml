@@ -28,6 +28,45 @@ grade: stable
 confinement: strict
 
 parts:
+  pcsc-lite:
+    plugin: autotools
+    configflags:
+      - --prefix=/snap/ausweisapp2-ce/current/usr
+      - --enable-usbdropdir=/snap/ausweisapp2-ce/current/usr/lib/pcsc/drivers
+      - --enable-ipcdir=/run/snap.ausweisapp2-ce
+    source-type: tar
+    source: https://pcsclite.apdu.fr/files/pcsc-lite-1.8.24.tar.bz2
+    build-packages:
+      - gcc
+      - pkg-config
+      - libsystemd-dev
+      - libudev-dev
+    override-build: |
+        snapcraftctl build
+        cp -r ${SNAPCRAFT_PART_INSTALL}/snap/ausweisapp2-ce/current/usr ${SNAPCRAFT_PART_INSTALL}/
+        rm -r ${SNAPCRAFT_PART_INSTALL}/snap ${SNAPCRAFT_PART_INSTALL}/lib
+        sed -i -e 's/\/snap\/ausweisapp2-ce\/current//g' ${SNAPCRAFT_PART_INSTALL}/usr/lib/pkgconfig/libpcsclite.pc
+
+  
+  ccid:
+    plugin: autotools
+    source-type: tar
+    configflags:
+      - --prefix=/usr
+      - --enable-usbdropdir=/snap/ausweisapp2-ce/current/usr/lib/pcsc/drivers
+    source: https://ccid.apdu.fr/files/ccid-1.4.30.tar.bz2
+    build-packages:
+      - pkg-config
+      - libusb-1.0-0-dev
+    override-build: |
+        snapcraftctl build
+        cp -r ${SNAPCRAFT_PART_INSTALL}/snap/ausweisapp2-ce/current/usr ${SNAPCRAFT_PART_INSTALL}/
+        rm -r ${SNAPCRAFT_PART_INSTALL}/snap
+    stage-packages:
+      - libusb-1.0-0 
+    after: [pcsc-lite]
+
+
   qt5:
     plugin: nil
     prime: [-*]
@@ -97,6 +136,15 @@ parts:
 
 
 apps:
+  pcscd:
+    command: usr/sbin/pcscd --foreground --auto-exit
+    daemon: simple
+    plugs:
+      - hardware-observe
+      - network
+      - network-bind
+      - raw-usb
+
   ausweisapp2-ce:
     command: desktop-launch $SNAP/usr/bin/AusweisApp2
     desktop: usr/share/applications/AusweisApp2.desktop
@@ -107,6 +155,7 @@ apps:
       - network
       - network-bind
       - home
+      - opengl
       - hardware-observe
       - network-manager
       - network-observe
