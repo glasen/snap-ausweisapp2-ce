@@ -101,7 +101,6 @@ parts:
       configflags: [-DCMAKE_BUILD_TYPE=RELEASE, -DCMAKE_INSTALL_PREFIX=/usr/, -DCMAKE_PREFIX_PATH=/root/parts/toolchain-qt/build/dist]
       source-type: tar
       source: https://github.com/Governikus/AusweisApp2/releases/download/1.16.1/AusweisApp2-1.16.1.tar.gz
-      after: [qt5]
       build-packages:
         - cmake
         - file
