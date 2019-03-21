@@ -17,6 +17,54 @@ icon: snap/gui/icon.svg
 grade: stable
 confinement: strict
 
+
+plugs: # additional plugs to pick up the GTK theme and icons from the system
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes
+
+
+environment:
+  QT_QPA_PLATFORMTHEME: gnome # set default theme to gtk to integrate with system theme (GTK3)
+
+
+apps:
+  pcscd:
+    command: usr/sbin/pcscd --foreground --auto-exit
+    daemon: simple
+    plugs:
+      - hardware-observe
+      - network
+      - network-bind
+      - raw-usb
+
+  ausweisapp2-ce:
+    command: desktop-launch $SNAP/usr/bin/AusweisApp2
+    desktop: usr/share/applications/AusweisApp2.desktop
+    environment:
+      DISABLE_WAYLAND: 1
+      QT_QPA_PLATFORMTHEME: gnome
+    plugs:
+      - desktop
+      - unity7
+      - network
+      - network-bind
+      - home
+      - opengl
+      - hardware-observe
+      - network-manager
+      - network-observe
+
+
 parts:
   pcsc-lite:
     plugin: autotools
@@ -71,7 +119,6 @@ parts:
 
   desktop-qt5:
     build-packages:
-    - build-essential
     - qtbase5-dev
     - dpkg-dev
     make-parameters:
@@ -80,6 +127,30 @@ parts:
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
     source-subdir: qt
     after: [qt5]
+    stage-packages:
+      - libxkbcommon0
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5
+
+
+  qgnomeplatform:
+    source: https://github.com/FedoraQt/QGnomePlatform.git
+    plugin: qmake
+    qt-version: qt5
+    build-packages:
+      - qtbase5-dev
+      - qtbase5-private-dev
+      - libgtk-3-dev
+    stage-packages:
+      - libgtk-3-0
+    after: [desktop-qt5]
 
 
   patches:
@@ -114,6 +185,8 @@ parts:
         - libqt5websockets5
         - libqt5xml5
         - libhttp-parser-dev
+        - qtwayland5
+        - qt5-style-plugins
       after: [desktop-qt5, qt5, patches]
 
       override-pull: |
@@ -124,29 +197,3 @@ parts:
         snapcraftctl build
         rm ${SNAPCRAFT_PART_INSTALL}/usr/bin/X11 ${SNAPCRAFT_PART_INSTALL}/usr/bin/fc* ${SNAPCRAFT_PART_INSTALL}/usr/bin/lib* ${SNAPCRAFT_PART_INSTALL}/usr/bin/uc* ${SNAPCRAFT_PART_INSTALL}/usr/bin/lcf
         strip ${SNAPCRAFT_PART_INSTALL}/usr/bin/AusweisApp2
-
-
-apps:
-  pcscd:
-    command: usr/sbin/pcscd --foreground --auto-exit
-    daemon: simple
-    plugs:
-      - hardware-observe
-      - network
-      - network-bind
-      - raw-usb
-
-  ausweisapp2-ce:
-    command: desktop-launch $SNAP/usr/bin/AusweisApp2
-    desktop: usr/share/applications/AusweisApp2.desktop
-
-    plugs:
-      - desktop
-      - unity7
-      - network
-      - network-bind
-      - home
-      - opengl
-      - hardware-observe
-      - network-manager-observe
-      - network-observe
