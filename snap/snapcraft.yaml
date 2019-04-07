@@ -18,6 +18,21 @@ grade: stable
 confinement: strict
 
 
+plugs: # plugs for theming, font settings, cursor and to use gtk3 file chooser
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes:gtk-3-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes:icon-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes:sounds-themes
+
+
 apps:
   pcscd:
     command: usr/sbin/pcscd --foreground --auto-exit
@@ -29,13 +44,18 @@ apps:
       - raw-usb
 
   ausweisapp2-ce:
-    command: desktop-launch $SNAP/usr/bin/AusweisApp2
+    adapter: full
+    command: usr/bin/AusweisApp2
+    command-chain:
+      - bin/desktop-launch
+      - bin/gtk3-env-launch
     desktop: usr/share/applications/AusweisApp2.desktop
     environment:
       DISABLE_WAYLAND: 1
     plugs:
       - desktop
       - unity7
+      - wayland
       - network
       - network-bind
       - home
@@ -43,9 +63,19 @@ apps:
       - hardware-observe
       - network-manager-observe
       - network-observe
+      - gsettings
 
 
 parts:
+  launchers: # custom launcher to set QT_QPA_PLATFORMTHEME=gtk3 correctly
+    source: local/launchers
+    plugin: dump
+    organize:
+      '*': bin/
+    stage:
+      - -bin/README.*
+
+
   pcsc-lite:
     plugin: autotools
     configflags:
@@ -53,7 +83,7 @@ parts:
       - --enable-usbdropdir=/snap/ausweisapp2-ce/current/usr/lib/pcsc/drivers
       - --enable-ipcdir=/run/snap.ausweisapp2-ce
     source-type: tar
-    source: https://pcsclite.apdu.fr/files/pcsc-lite-1.8.24.tar.bz2
+    source: https://pcsclite.apdu.fr/files/pcsc-lite-1.8.25.tar.bz2
     build-packages:
       - gcc
       - pkg-config
@@ -107,6 +137,16 @@ parts:
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
     source-subdir: qt
     after: [qt5]
+    stage-packages:
+    - libxkbcommon0
+    - ttf-ubuntu-font-family
+    - dmz-cursor-theme
+    - light-themes
+    - shared-mime-info
+    - libqt5gui5
+    - libgdk-pixbuf2.0-0
+    - libqt5svg5
+    - locales-all
 
 
   patches:
@@ -142,6 +182,7 @@ parts:
         - libqt5xml5
         - libhttp-parser-dev
         - qtwayland5
+        - qt5-gtk-platformtheme
       after: [desktop-qt5, qt5, patches]
 
       override-pull: |
