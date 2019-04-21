@@ -1,6 +1,6 @@
-diff -upNr AusweisApp2-1.16.1/cmake/DefaultFiles.cmake AusweisApp2-1.16.1-patched/cmake/DefaultFiles.cmake
+diff -upNr AusweisApp2-1.16.1/cmake/DefaultFiles.cmake AusweisApp2-1.16.1.patched/cmake/DefaultFiles.cmake
 --- AusweisApp2-1.16.1/cmake/DefaultFiles.cmake	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/cmake/DefaultFiles.cmake	2019-01-05 17:26:50.859233292 +0100
++++ AusweisApp2-1.16.1.patched/cmake/DefaultFiles.cmake	2019-04-16 15:40:25.168717354 +0200
 @@ -23,5 +23,7 @@ FUNCTION(CONFIGURE_DEFAULT_FILES _destin
  	CONFIGURE_FILE(${RESOURCES_DIR}/config.json.in ${_destination}/config.json @ONLY)
  
@@ -10,9 +10,9 @@ diff -upNr AusweisApp2-1.16.1/cmake/DefaultFiles.cmake AusweisApp2-1.16.1-patche
 +		CONFIGURE_FILE(${RESOURCES_DIR}/qtlogging.ini ${_destination}/qtlogging.ini COPYONLY)
 +	ENDIF()
  ENDFUNCTION()
-diff -upNr AusweisApp2-1.16.1/cmake/Install.cmake AusweisApp2-1.16.1-patched/cmake/Install.cmake
+diff -upNr AusweisApp2-1.16.1/cmake/Install.cmake AusweisApp2-1.16.1.patched/cmake/Install.cmake
 --- AusweisApp2-1.16.1/cmake/Install.cmake	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/cmake/Install.cmake	2019-01-05 17:39:44.414504269 +0100
++++ AusweisApp2-1.16.1.patched/cmake/Install.cmake	2019-04-16 15:40:25.168717354 +0200
 @@ -3,7 +3,7 @@
  # It will be included by ./src/CMakeLists.txt
  ################################################
@@ -60,9 +60,9 @@ diff -upNr AusweisApp2-1.16.1/cmake/Install.cmake AusweisApp2-1.16.1-patched/cma
 +ELSE()
 +	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.json DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)	
 +ENDIF()
-diff -upNr AusweisApp2-1.16.1/CMakeLists.txt AusweisApp2-1.16.1-patched/CMakeLists.txt
+diff -upNr AusweisApp2-1.16.1/CMakeLists.txt AusweisApp2-1.16.1.patched/CMakeLists.txt
 --- AusweisApp2-1.16.1/CMakeLists.txt	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/CMakeLists.txt	2019-01-05 14:31:52.233359207 +0100
++++ AusweisApp2-1.16.1.patched/CMakeLists.txt	2019-04-16 15:40:25.168717354 +0200
 @@ -100,6 +100,13 @@ ELSE()
  	SET(CMAKE_BUILD_TYPE "DEBUG" CACHE STRING "build type configuration" FORCE)
  ENDIF()
@@ -77,9 +77,9 @@ diff -upNr AusweisApp2-1.16.1/CMakeLists.txt AusweisApp2-1.16.1-patched/CMakeLis
  IF(DESKTOP)
  	SET(CMAKE_AUTOUIC ON)
  ENDIF()
-diff -upNr AusweisApp2-1.16.1/resources/packaging/linux/AusweisApp2.desktop.in AusweisApp2-1.16.1-patched/resources/packaging/linux/AusweisApp2.desktop.in
+diff -upNr AusweisApp2-1.16.1/resources/packaging/linux/AusweisApp2.desktop.in AusweisApp2-1.16.1.patched/resources/packaging/linux/AusweisApp2.desktop.in
 --- AusweisApp2-1.16.1/resources/packaging/linux/AusweisApp2.desktop.in	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/resources/packaging/linux/AusweisApp2.desktop.in	2019-01-05 14:36:04.593057878 +0100
++++ AusweisApp2-1.16.1.patched/resources/packaging/linux/AusweisApp2.desktop.in	2019-04-16 15:40:25.168717354 +0200
 @@ -2,7 +2,7 @@
  Version=1.0
  Type=Application
@@ -89,9 +89,9 @@ diff -upNr AusweisApp2-1.16.1/resources/packaging/linux/AusweisApp2.desktop.in A
  StartupNotify=true
  Terminal=false
  Categories=Utility;Accessibility;
-diff -upNr AusweisApp2-1.16.1/src/card/base/command/BaseCardCommand.cpp AusweisApp2-1.16.1-patched/src/card/base/command/BaseCardCommand.cpp
+diff -upNr AusweisApp2-1.16.1/src/card/base/command/BaseCardCommand.cpp AusweisApp2-1.16.1.patched/src/card/base/command/BaseCardCommand.cpp
 --- AusweisApp2-1.16.1/src/card/base/command/BaseCardCommand.cpp	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/src/card/base/command/BaseCardCommand.cpp	2019-01-05 14:32:48.449300756 +0100
++++ AusweisApp2-1.16.1.patched/src/card/base/command/BaseCardCommand.cpp	2019-04-16 15:40:25.168717354 +0200
 @@ -45,7 +45,9 @@ void BaseCardCommand::execute()
  	Q_ASSERT(QObject::thread() == QThread::currentThread());
  
@@ -103,9 +103,9 @@ diff -upNr AusweisApp2-1.16.1/src/card/base/command/BaseCardCommand.cpp AusweisA
  
  	// A "Command" is created by CardConnection::call() in Main-Thread and moved to ReaderManager-Thread.
  	// The internal execution of a command will be self-sufficient until it has finished. After the
-diff -upNr AusweisApp2-1.16.1/src/core/states/StateUpdateRetryCounter.cpp AusweisApp2-1.16.1-patched/src/core/states/StateUpdateRetryCounter.cpp
+diff -upNr AusweisApp2-1.16.1/src/core/states/StateUpdateRetryCounter.cpp AusweisApp2-1.16.1.patched/src/core/states/StateUpdateRetryCounter.cpp
 --- AusweisApp2-1.16.1/src/core/states/StateUpdateRetryCounter.cpp	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/src/core/states/StateUpdateRetryCounter.cpp	2019-01-05 17:11:21.906157932 +0100
++++ AusweisApp2-1.16.1.patched/src/core/states/StateUpdateRetryCounter.cpp	2019-04-16 15:40:25.168717354 +0200
 @@ -24,7 +24,9 @@ void StateUpdateRetryCounter::run()
  	auto cardConnection = getContext()->getCardConnection();
  	if (!cardConnection)
@@ -132,9 +132,9 @@ diff -upNr AusweisApp2-1.16.1/src/core/states/StateUpdateRetryCounter.cpp Auswei
  		qCritical(statemachine) << "An error occurred while communicating with the card reader, cannot determine retry counter, abort state";
  		getContext()->resetCardConnection();
  		Q_EMIT fireAbort();
-diff -upNr AusweisApp2-1.16.1/src/global/FileDestination.h AusweisApp2-1.16.1-patched/src/global/FileDestination.h
+diff -upNr AusweisApp2-1.16.1/src/global/FileDestination.h AusweisApp2-1.16.1.patched/src/global/FileDestination.h
 --- AusweisApp2-1.16.1/src/global/FileDestination.h	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/src/global/FileDestination.h	2019-01-05 16:45:48.944804157 +0100
++++ AusweisApp2-1.16.1.patched/src/global/FileDestination.h	2019-04-16 15:40:25.168717354 +0200
 @@ -47,6 +47,23 @@ class FileDestination
  		}
  
@@ -159,9 +159,9 @@ diff -upNr AusweisApp2-1.16.1/src/global/FileDestination.h AusweisApp2-1.16.1-pa
  };
  
  } // namespace governikus
-diff -upNr AusweisApp2-1.16.1/src/global/LanguageLoader.cpp AusweisApp2-1.16.1-patched/src/global/LanguageLoader.cpp
+diff -upNr AusweisApp2-1.16.1/src/global/LanguageLoader.cpp AusweisApp2-1.16.1.patched/src/global/LanguageLoader.cpp
 --- AusweisApp2-1.16.1/src/global/LanguageLoader.cpp	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/src/global/LanguageLoader.cpp	2019-01-05 17:46:31.009611355 +0100
++++ AusweisApp2-1.16.1.patched/src/global/LanguageLoader.cpp	2019-04-16 15:40:25.168717354 +0200
 @@ -23,7 +23,7 @@ const QLocale::Language LanguageLoader::
  QLocale LanguageLoader::mDefaultLanguage = QLocale::system();
  
@@ -179,9 +179,9 @@ diff -upNr AusweisApp2-1.16.1/src/global/LanguageLoader.cpp AusweisApp2-1.16.1-p
  }
  
  
-diff -upNr AusweisApp2-1.16.1/src/global/ResourceLoader.cpp AusweisApp2-1.16.1-patched/src/global/ResourceLoader.cpp
+diff -upNr AusweisApp2-1.16.1/src/global/ResourceLoader.cpp AusweisApp2-1.16.1.patched/src/global/ResourceLoader.cpp
 --- AusweisApp2-1.16.1/src/global/ResourceLoader.cpp	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/src/global/ResourceLoader.cpp	2019-01-05 17:44:42.409865247 +0100
++++ AusweisApp2-1.16.1.patched/src/global/ResourceLoader.cpp	2019-04-16 15:40:25.168717354 +0200
 @@ -42,7 +42,7 @@ void ResourceLoader::init()
  {
  	for (const auto& file : mFilenames)
@@ -191,9 +191,9 @@ diff -upNr AusweisApp2-1.16.1/src/global/ResourceLoader.cpp AusweisApp2-1.16.1-p
  
  #ifndef QT_NO_DEBUG
  		const auto& filePathFromTestDir = QCoreApplication::applicationDirPath() + QStringLiteral("/../../src/") + file;
-diff -upNr AusweisApp2-1.16.1/src/secure_storage/SecureStorage.cpp AusweisApp2-1.16.1-patched/src/secure_storage/SecureStorage.cpp
+diff -upNr AusweisApp2-1.16.1/src/secure_storage/SecureStorage.cpp AusweisApp2-1.16.1.patched/src/secure_storage/SecureStorage.cpp
 --- AusweisApp2-1.16.1/src/secure_storage/SecureStorage.cpp	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/src/secure_storage/SecureStorage.cpp	2019-01-05 14:35:27.045111512 +0100
++++ AusweisApp2-1.16.1.patched/src/secure_storage/SecureStorage.cpp	2019-04-16 15:40:25.168717354 +0200
 @@ -95,7 +95,8 @@ SecureStorage& SecureStorage::getInstanc
  
  void SecureStorage::load()
@@ -204,9 +204,9 @@ diff -upNr AusweisApp2-1.16.1/src/secure_storage/SecureStorage.cpp AusweisApp2-1
  
  	if (!QFile::exists(path))
  	{
-diff -upNr AusweisApp2-1.16.1/src/ui/aidl/UIPlugInAidl.cpp AusweisApp2-1.16.1-patched/src/ui/aidl/UIPlugInAidl.cpp
+diff -upNr AusweisApp2-1.16.1/src/ui/aidl/UIPlugInAidl.cpp AusweisApp2-1.16.1.patched/src/ui/aidl/UIPlugInAidl.cpp
 --- AusweisApp2-1.16.1/src/ui/aidl/UIPlugInAidl.cpp	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/src/ui/aidl/UIPlugInAidl.cpp	2019-01-05 17:45:13.653793105 +0100
++++ AusweisApp2-1.16.1.patched/src/ui/aidl/UIPlugInAidl.cpp	2019-04-16 15:40:25.168717354 +0200
 @@ -46,10 +46,12 @@ UIPlugInAidl::UIPlugInAidl()
  		mJsonApi->setEnabled();
  		mInitializationSuccessfull = true;
@@ -220,9 +220,26 @@ diff -upNr AusweisApp2-1.16.1/src/ui/aidl/UIPlugInAidl.cpp AusweisApp2-1.16.1-pa
  
  	instance = this;
  }
-diff -upNr AusweisApp2-1.16.1/src/ui/jsonapi/MessageDispatcher.cpp AusweisApp2-1.16.1-patched/src/ui/jsonapi/MessageDispatcher.cpp
+diff -upNr AusweisApp2-1.16.1/src/ui/common/TrayIcon.cpp AusweisApp2-1.16.1.patched/src/ui/common/TrayIcon.cpp
+--- AusweisApp2-1.16.1/src/ui/common/TrayIcon.cpp	2018-12-21 12:38:52.000000000 +0100
++++ AusweisApp2-1.16.1.patched/src/ui/common/TrayIcon.cpp	2019-04-21 12:20:00.483134045 +0200
+@@ -70,12 +70,11 @@ void TrayIcon::create()
+ 
+ 	const auto trayIconMenu = new QMenu(nullptr);
+ 
+-#if defined(Q_OS_MACOS)
++
+ 	QAction* showApplicationAction = new QAction(tr("Open"), trayIconMenu);
+ 	connect(showApplicationAction, &QAction::triggered, this, &TrayIcon::fireShow);
+ 	trayIconMenu->addAction(showApplicationAction);
+ 	trayIconMenu->addSeparator();
+-#endif
+ 
+ 	const auto quitAction = new QAction(tr("Exit AusweisApp2"), trayIconMenu);
+ 	connect(quitAction, &QAction::triggered, this, &TrayIcon::fireQuit);
+diff -upNr AusweisApp2-1.16.1/src/ui/jsonapi/MessageDispatcher.cpp AusweisApp2-1.16.1.patched/src/ui/jsonapi/MessageDispatcher.cpp
 --- AusweisApp2-1.16.1/src/ui/jsonapi/MessageDispatcher.cpp	2018-12-21 12:38:52.000000000 +0100
-+++ AusweisApp2-1.16.1-patched/src/ui/jsonapi/MessageDispatcher.cpp	2019-01-05 17:14:58.993349774 +0100
++++ AusweisApp2-1.16.1.patched/src/ui/jsonapi/MessageDispatcher.cpp	2019-04-16 15:40:25.168717354 +0200
 @@ -143,7 +143,11 @@ MsgHandler MessageDispatcher::createForC
  	}
  

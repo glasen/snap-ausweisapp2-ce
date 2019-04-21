@@ -48,7 +48,6 @@ apps:
     command: usr/bin/AusweisApp2
     command-chain:
       - bin/desktop-launch
-      - bin/gtk3-env-launch
     desktop: usr/share/applications/AusweisApp2.desktop
     environment:
       DISABLE_WAYLAND: 1
@@ -67,15 +66,6 @@ apps:
 
 
 parts:
-  launchers: # custom launcher to set QT_QPA_PLATFORMTHEME=gtk3 correctly
-    source: local/launchers
-    plugin: dump
-    organize:
-      '*': bin/
-    stage:
-      - -bin/README.*
-
-
   pcsc-lite:
     plugin: autotools
     configflags:
