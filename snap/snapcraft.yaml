@@ -48,7 +48,6 @@ apps:
     command: usr/bin/AusweisApp2
     command-chain:
       - bin/desktop-launch
-    desktop: usr/share/applications/AusweisApp2.desktop
     environment:
       DISABLE_WAYLAND: 1
     plugs:
@@ -97,6 +96,29 @@ parts:
       - pkg-config
       - libusb-1.0-0-dev
     override-build: |
+        snapcraftctl build
+        cp -r ${SNAPCRAFT_PART_INSTALL}/snap/ausweisapp2-ce/current/usr ${SNAPCRAFT_PART_INSTALL}/
+        rm -r ${SNAPCRAFT_PART_INSTALL}/snap
+    stage-packages:
+      - libusb-1.0-0
+    after: [pcsc-lite]
+
+
+  reiner-sct-drivers:
+    plugin: autotools
+    source-type: tar
+    configflags:
+      - --prefix=/usr
+      - --with-usbdropdir=/snap/ausweisapp2-ce/current/usr/lib/pcsc/drivers
+    source: http://support.reiner-sct.de/downloads/LINUX/V3.99.5_SP13/pcsc-cyberjack_3.99.5final.SP13.tar.gz
+    build-packages:
+      - pkg-config
+      - libusb-1.0-0-dev
+      - dh-autoreconf
+      - debhelper
+    override-build: |
+        dh_update_autotools_config -a -O--parallel
+        dh_autoreconf -a -O--parallel
         snapcraftctl build
         cp -r ${SNAPCRAFT_PART_INSTALL}/snap/ausweisapp2-ce/current/usr ${SNAPCRAFT_PART_INSTALL}/
         rm -r ${SNAPCRAFT_PART_INSTALL}/snap
