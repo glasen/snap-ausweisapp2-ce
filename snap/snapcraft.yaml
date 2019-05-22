@@ -141,7 +141,7 @@ parts:
     plugin: nil
     prime: [-*]
     override-build: |
-      echo "deb http://archive.neon.kde.org/user bionic main" | tee /etc/apt/sources.list.d/kde-neon.list
+      echo "deb http://archive.neon.kde.org/experimental bionic main" | tee /etc/apt/sources.list.d/kde-neon.list
       wget -O - https://archive.neon.kde.org/public.key | apt-key add - 
       apt update
       apt install -yy qtbase5-dev libqt5websockets5-dev qtconnectivity5-dev qtdeclarative5-dev qtquickcontrols2-5-dev libssl-dev libpcsclite-dev libqt5svg5 libqt5websockets5 libqt5xml5
