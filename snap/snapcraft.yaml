@@ -1,5 +1,5 @@
 name: ausweisapp2-ce
-version: '1.16.1'
+version: '1.16.2'
 base: core18
 summary: AusweisApp2-CE - Tool for the german nPA (Community Edition)
 description: |
@@ -45,9 +45,10 @@ apps:
 
   ausweisapp2-ce:
     adapter: full
-    command: usr/bin/AusweisApp2
+    command: usr/bin/AusweisApp2 -style fusion
     command-chain:
       - bin/desktop-launch
+      - bin/gtk3-env-launch
     environment:
       DISABLE_WAYLAND: 1
     plugs:
@@ -65,6 +66,15 @@ apps:
 
 
 parts:
+  launchers: # custom launcher to set QT_QPA_PLATFORMTHEME=gtk3 correctly
+    source: snap/local/launchers
+    plugin: dump
+    organize:
+      '*': bin/
+    stage:
+      - -bin/README.*
+
+
   pcsc-lite:
     plugin: autotools
     configflags:
@@ -154,6 +164,8 @@ parts:
     - ttf-ubuntu-font-family
     - dmz-cursor-theme
     - light-themes
+    - adwaita-icon-theme
+    - gnome-themes-standard
     - shared-mime-info
     - libqt5gui5
     - libgdk-pixbuf2.0-0
@@ -171,7 +183,7 @@ parts:
       plugin: cmake
       configflags: [-DCMAKE_BUILD_TYPE=RELEASE, -DCMAKE_INSTALL_PREFIX=/usr/]
       source-type: tar
-      source: https://github.com/Governikus/AusweisApp2/releases/download/1.16.1/AusweisApp2-1.16.1.tar.gz
+      source: https://github.com/Governikus/AusweisApp2/releases/download/1.16.2/AusweisApp2-1.16.2.tar.gz
       build-packages:
         - cmake
         - file
@@ -195,6 +207,7 @@ parts:
         - libhttp-parser-dev
         - qtwayland5
         - qt5-gtk-platformtheme
+
       after: [desktop-qt5, qt5, patches]
 
       override-pull: |
