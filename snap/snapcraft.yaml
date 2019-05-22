@@ -162,10 +162,6 @@ parts:
     stage-packages:
     - libxkbcommon0
     - ttf-ubuntu-font-family
-    - dmz-cursor-theme
-    - light-themes
-    - adwaita-icon-theme
-    - gnome-themes-standard
     - shared-mime-info
     - libqt5gui5
     - libgdk-pixbuf2.0-0
