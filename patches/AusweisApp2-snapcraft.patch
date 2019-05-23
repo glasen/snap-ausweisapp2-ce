@@ -60,23 +60,6 @@ diff -upNr AusweisApp2-1.16.2.orig/cmake/Install.cmake AusweisApp2-1.16.2.patche
 +ELSE()
 +	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.json DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)	
 +ENDIF()
-diff -upNr AusweisApp2-1.16.2.orig/CMakeLists.txt AusweisApp2-1.16.2.patched/CMakeLists.txt
---- AusweisApp2-1.16.2.orig/CMakeLists.txt	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/CMakeLists.txt	2019-05-22 14:11:35.701115210 +0200
-@@ -100,6 +100,13 @@ ELSE()
- 	SET(CMAKE_BUILD_TYPE "DEBUG" CACHE STRING "build type configuration" FORCE)
- ENDIF()
- 
-+
-+IF(${CMAKE_BUILD_TYPE} STREQUAL "RELEASE")
-+	ADD_DEFINITIONS(-DQT_NO_DEBUG)
-+	ADD_DEFINITIONS(-DQT_NO_DEBUG_OUTPUT)
-+	ADD_DEFINITIONS(-DQT_NO_WARNING_OUTPUT)
-+ENDIF()
-+
- IF(DESKTOP)
- 	SET(CMAKE_AUTOUIC ON)
- ENDIF()
 diff -upNr AusweisApp2-1.16.2.orig/resources/packaging/linux/AusweisApp2.desktop.in AusweisApp2-1.16.2.patched/resources/packaging/linux/AusweisApp2.desktop.in
 --- AusweisApp2-1.16.2.orig/resources/packaging/linux/AusweisApp2.desktop.in	2019-05-15 09:08:32.000000000 +0200
 +++ AusweisApp2-1.16.2.patched/resources/packaging/linux/AusweisApp2.desktop.in	2019-05-22 14:11:35.701115210 +0200
@@ -89,46 +72,6 @@ diff -upNr AusweisApp2-1.16.2.orig/resources/packaging/linux/AusweisApp2.desktop
  StartupNotify=true
  Terminal=false
  Categories=Utility;Accessibility;
-diff -upNr AusweisApp2-1.16.2.orig/src/card/base/command/BaseCardCommand.cpp AusweisApp2-1.16.2.patched/src/card/base/command/BaseCardCommand.cpp
---- AusweisApp2-1.16.2.orig/src/card/base/command/BaseCardCommand.cpp	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/card/base/command/BaseCardCommand.cpp	2019-05-22 14:12:35.653024618 +0200
-@@ -45,7 +45,10 @@ void BaseCardCommand::execute()
- 	Q_ASSERT(QObject::thread() == QThread::currentThread());
- 
- 	internalExecute();
--	qCDebug(card) << metaObject()->className() << "| ReturnCode of internal execute:" << mReturnCode;
-+	
-+	#ifndef QT_NO_DEBUG_OUTPUT
-+		qCDebug(card) << metaObject()->className() << "| ReturnCode of internal execute:" << mReturnCode;
-+	#endif // QT_NO_DEBUG_OUTPUT
- 
- 	// A "Command" is created by CardConnection::call() in Main-Thread and moved to ReaderManager-Thread.
- 	// The internal execution of a command will be self-sufficient until it has finished. After the
-diff -upNr AusweisApp2-1.16.2.orig/src/core/states/StateUpdateRetryCounter.cpp AusweisApp2-1.16.2.patched/src/core/states/StateUpdateRetryCounter.cpp
---- AusweisApp2-1.16.2.orig/src/core/states/StateUpdateRetryCounter.cpp	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/core/states/StateUpdateRetryCounter.cpp	2019-05-22 14:14:31.664320995 +0200
-@@ -24,7 +24,9 @@ void StateUpdateRetryCounter::run()
- 	auto cardConnection = getContext()->getCardConnection();
- 	if (!cardConnection)
- 	{
--		qCDebug(statemachine) << "No card connection available.";
-+		#ifndef QT_NO_DEBUG_OUTPUT
-+			qCDebug(statemachine) << "No card connection available.";
-+		#endif // QT_NO_DEBUG_OUTPUT
- 		Q_EMIT fireAbort();
- 		return;
- 	}
-@@ -36,7 +38,9 @@ void StateUpdateRetryCounter::run()
- 
- void StateUpdateRetryCounter::onUpdateRetryCounterDone(QSharedPointer<BaseCardCommand> pCommand)
- {
--	qCDebug(statemachine) << "StateUpdateRetryCounter::onUpdateRetryCounterDone()";
-+	#ifndef QT_NO_DEBUG_OUTPUT
-+		qCDebug(statemachine) << "StateUpdateRetryCounter::onUpdateRetryCounterDone()";
-+	#endif // QT_NO_DEBUG_OUTPUT
- 
- 	if (pCommand->getReturnCode() != CardReturnCode::OK)
- 	{
 diff -upNr AusweisApp2-1.16.2.orig/src/global/FileDestination.h AusweisApp2-1.16.2.patched/src/global/FileDestination.h
 --- AusweisApp2-1.16.2.orig/src/global/FileDestination.h	2019-05-15 09:08:33.000000000 +0200
 +++ AusweisApp2-1.16.2.patched/src/global/FileDestination.h	2019-05-22 14:11:35.705115203 +0200
@@ -201,22 +144,6 @@ diff -upNr AusweisApp2-1.16.2.orig/src/secure_storage/SecureStorage.cpp AusweisA
  
  	if (!QFile::exists(path))
  	{
-diff -upNr AusweisApp2-1.16.2.orig/src/ui/aidl/UIPlugInAidl.cpp AusweisApp2-1.16.2.patched/src/ui/aidl/UIPlugInAidl.cpp
---- AusweisApp2-1.16.2.orig/src/ui/aidl/UIPlugInAidl.cpp	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/ui/aidl/UIPlugInAidl.cpp	2019-05-22 14:15:59.067810423 +0200
-@@ -46,10 +46,12 @@ UIPlugInAidl::UIPlugInAidl()
- 		mJsonApi->setEnabled();
- 		mInitializationSuccessfull = true;
- 	}
-+	#ifndef QT_NO_WARNING_OUTPUT
- 	else
- 	{
- 		qCWarning(aidl) << "Cannot start AIDL because JSON-API is missing";
- 	}
-+	#endif // QT_NO_WARNING_OUTPUT
- 
- 	instance = this;
- }
 diff -upNr AusweisApp2-1.16.2.orig/src/ui/common/TrayIcon.cpp AusweisApp2-1.16.2.patched/src/ui/common/TrayIcon.cpp
 --- AusweisApp2-1.16.2.orig/src/ui/common/TrayIcon.cpp	2019-05-15 09:08:32.000000000 +0200
 +++ AusweisApp2-1.16.2.patched/src/ui/common/TrayIcon.cpp	2019-05-22 14:11:35.705115203 +0200
@@ -234,19 +161,3 @@ diff -upNr AusweisApp2-1.16.2.orig/src/ui/common/TrayIcon.cpp AusweisApp2-1.16.2
  
  	const auto quitAction = new QAction(tr("Exit AusweisApp2"), trayIconMenu);
  	connect(quitAction, &QAction::triggered, this, &TrayIcon::fireQuit);
-diff -upNr AusweisApp2-1.16.2.orig/src/ui/jsonapi/MessageDispatcher.cpp AusweisApp2-1.16.2.patched/src/ui/jsonapi/MessageDispatcher.cpp
---- AusweisApp2-1.16.2.orig/src/ui/jsonapi/MessageDispatcher.cpp	2019-05-15 09:08:33.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/ui/jsonapi/MessageDispatcher.cpp	2019-05-22 14:17:34.851304639 +0200
-@@ -143,7 +143,11 @@ MsgHandler MessageDispatcher::createForC
- 	}
- 
- 	auto requestType = Enum<MsgCmdType>::fromString(cmd, MsgCmdType::UNDEFINED);
--	qCDebug(jsonapi) << "Process type:" << requestType;
-+
-+	#ifndef QT_NO_DEBUG_OUTPUT
-+		qDebug(jsonapi) << "Process type:" << requestType;
-+	#endif // QT_NO_DEBUG_OUTPUT
-+
- 	switch (requestType)
- 	{
- 		case MsgCmdType::UNDEFINED:

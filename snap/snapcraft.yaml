@@ -45,7 +45,7 @@ apps:
 
   ausweisapp2-ce:
     adapter: full
-    command: usr/bin/AusweisApp2 -style fusion
+    command: usr/bin/AusweisApp2 -style fusion --no-loghandler
     command-chain:
       - bin/desktop-launch
       - bin/gtk3-env-launch
