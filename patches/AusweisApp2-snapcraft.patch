@@ -1,18 +1,6 @@
-diff -upNr AusweisApp2-1.16.2.orig/cmake/DefaultFiles.cmake AusweisApp2-1.16.2.patched/cmake/DefaultFiles.cmake
---- AusweisApp2-1.16.2.orig/cmake/DefaultFiles.cmake	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/cmake/DefaultFiles.cmake	2019-05-22 14:11:35.701115210 +0200
-@@ -23,5 +23,7 @@ FUNCTION(CONFIGURE_DEFAULT_FILES _destin
- 	CONFIGURE_FILE(${RESOURCES_DIR}/config.json.in ${_destination}/config.json @ONLY)
- 
- 	# Copy qtlogging.ini file
--	CONFIGURE_FILE(${RESOURCES_DIR}/qtlogging.ini ${_destination}/qtlogging.ini COPYONLY)
-+	IF(NOT ${CMAKE_BUILD_TYPE} STREQUAL "RELEASE")
-+		CONFIGURE_FILE(${RESOURCES_DIR}/qtlogging.ini ${_destination}/qtlogging.ini COPYONLY)
-+	ENDIF()
- ENDFUNCTION()
-diff -upNr AusweisApp2-1.16.2.orig/cmake/Install.cmake AusweisApp2-1.16.2.patched/cmake/Install.cmake
---- AusweisApp2-1.16.2.orig/cmake/Install.cmake	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/cmake/Install.cmake	2019-05-22 14:11:35.701115210 +0200
+diff -upNr AusweisApp2-1.18.2.orig/cmake/Install.cmake AusweisApp2-1.18.2.patched/cmake/Install.cmake
+--- AusweisApp2-1.18.2.orig/cmake/Install.cmake	2019-09-30 17:25:27.000000000 +0200
++++ AusweisApp2-1.18.2.patched/cmake/Install.cmake	2019-11-20 19:14:16.464539619 +0100
 @@ -3,7 +3,7 @@
  # It will be included by ./src/CMakeLists.txt
  ################################################
@@ -22,16 +10,34 @@ diff -upNr AusweisApp2-1.16.2.orig/cmake/Install.cmake AusweisApp2-1.16.2.patche
  SET(DEFAULT_FILE_DESTINATION .)
  
  IF(CMAKE_PREFIX_PATH)
-@@ -269,7 +269,7 @@ ELSEIF(UNIX)
+@@ -78,7 +78,7 @@ IF(WIN32)
+ 		${DEPENDENCY_CHECK}
+ 		${SEARCH_ADDITIONAL_DIRS}
+ 		INCLUDE(BundleUtilities)
+-		FIXUP_BUNDLE(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}${CMAKE_EXECUTABLE_SUFFIX}\" \"${libQuickControls2}\" \"${TOOLCHAIN_BIN_PATH};\${ADDITIONAL_DIRS}\")
++		#FIXUP_BUNDLE(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}${CMAKE_EXECUTABLE_SUFFIX}\" \"${libQuickControls2}\" \"${TOOLCHAIN_BIN_PATH};\${ADDITIONAL_DIRS}\")
+ 		" COMPONENT Runtime)
+ 
+ 
+@@ -139,7 +139,7 @@ ELSEIF(APPLE AND NOT IOS)
+ 		file(GLOB_RECURSE QTPLUGINS \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MACOS_BUNDLE_PLUGINS_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+ 		file(GLOB_RECURSE QtQuickPLUGINS \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MACOS_BUNDLE_RESOURCES_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+ 		INCLUDE(BundleUtilities)
+-		FIXUP_BUNDLE(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MACOS_BUNDLE_MACOS_DIR}/${PROJECT_NAME}\" \"\${QTPLUGINS};\${QtQuickPLUGINS}\" \"${TOOLCHAIN_LIB_PATH};\${ADDITIONAL_DIRS}\")
++		#FIXUP_BUNDLE(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MACOS_BUNDLE_MACOS_DIR}/${PROJECT_NAME}\" \"\${QTPLUGINS};\${QtQuickPLUGINS}\" \"${TOOLCHAIN_LIB_PATH};\${ADDITIONAL_DIRS}\")
+ 		" COMPONENT Runtime)
+ 
+ 	LIST(APPEND ADDITIONAL_BUNDLE_FILES_TO_SIGN "/Contents/Library/LoginItems/AusweisApp2AutostartHelper.app/Contents/MacOS/AusweisApp2AutostartHelper")
+@@ -275,7 +275,7 @@ ELSEIF(UNIX)
+ 		${DEPENDENCY_CHECK}
+ 		${SEARCH_ADDITIONAL_DIRS}
+ 		INCLUDE(BundleUtilities)
+-		FIXUP_BUNDLE(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${DEFAULT_FILE_DESTINATION}/${PROJECT_NAME}\" \"\" \"\${ADDITIONAL_DIRS}\")
++		#FIXUP_BUNDLE(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${DEFAULT_FILE_DESTINATION}/${PROJECT_NAME}\" \"\" \"\${ADDITIONAL_DIRS}\")
+ 		" COMPONENT Runtime)
  
  	CONFIGURE_FILE(${PACKAGING_DIR}/linux/AusweisApp2.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/AusweisApp2.desktop @ONLY)
- 	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/AusweisApp2.desktop DESTINATION share/applications COMPONENT Application)
--	#INSTALL(FILES ${RESOURCES_DIR}/images/AusweisApp2.svg DESTINATION share/icons/hicolor/scalable/apps COMPONENT Application)
-+	INSTALL(FILES ${RESOURCES_DIR}/images/npa.svg DESTINATION share/icons/hicolor/scalable/apps COMPONENT Application)
- ENDIF()
- 
- 
-@@ -311,12 +311,16 @@ ELSEIF(NOT ANDROID_BUILD_AAR)
+@@ -322,17 +322,26 @@ ELSEIF(NOT ANDROID_BUILD_AAR)
  	INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/translations/ DESTINATION ${TRANSLATION_DESTINATION} COMPONENT Translations)
  ENDIF()
  
@@ -41,98 +47,56 @@ diff -upNr AusweisApp2-1.16.2.orig/cmake/Install.cmake AusweisApp2-1.16.2.patche
  	INSTALL(FILES ${RCC} DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)
  ENDIF()
  
--IF(NOT ANDROID AND NOT IOS)
+-# qt qml plugins
+-IF(DESKTOP AND TARGET Qt5::Qml)
+-	FOREACH(entry QtQuick QtQuick.2 QtQml QtGraphicalEffects Qt)
+-		INSTALL(DIRECTORY ${QT_HOST_PREFIX}/qml/${entry} DESTINATION ${DEFAULT_FILE_DESTINATION}/qml COMPONENT Runtime PATTERN "*.dylib" EXCLUDE)
+-	ENDFOREACH()
 +IF (LINUX)
-+	INSTALL(FILES ${RCC} DESTINATION share/AusweisApp2 COMPONENT Runtime)
-+ENDIF()
-+
-+IF(NOT ANDROID AND NOT IOS AND NOT ${CMAKE_BUILD_TYPE} STREQUAL "RELEASE")
- 	# qtlogging.ini
- 	INSTALL(FILES ${RESOURCES_DIR}/qtlogging.ini DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)
- ENDIF()
-@@ -329,4 +333,8 @@ IF(DESKTOP AND TARGET Qt5::Qml)
++   INSTALL(FILES ${RCC} DESTINATION share/AusweisApp2 COMPONENT Runtime)
  ENDIF()
  
++# qt qml plugins
++#IF(DESKTOP AND TARGET Qt5::Qml)
++#	FOREACH(entry QtQuick QtQuick.2 QtQml QtGraphicalEffects Qt)
++#		INSTALL(DIRECTORY ${QT_HOST_PREFIX}/qml/${entry} DESTINATION ${DEFAULT_FILE_DESTINATION}/qml COMPONENT Runtime PATTERN "*.dylib" EXCLUDE)
++#	ENDFOREACH()
++#ENDIF()
++
  # secure storage file
 -INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.json DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)
++
 +IF (LINUX)
-+	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.json DESTINATION share/AusweisApp2 COMPONENT Runtime)
-+ELSE()
-+	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.json DESTINATION ${DEFAULT_FILE_DESTINATION} COMPONENT Runtime)	
-+ENDIF()
-diff -upNr AusweisApp2-1.16.2.orig/CMakeLists.txt AusweisApp2-1.16.2.patched/CMakeLists.txt
---- AusweisApp2-1.16.2.orig/CMakeLists.txt	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/CMakeLists.txt	2019-05-22 14:11:35.701115210 +0200
-@@ -100,6 +100,13 @@ ELSE()
- 	SET(CMAKE_BUILD_TYPE "DEBUG" CACHE STRING "build type configuration" FORCE)
- ENDIF()
- 
-+
-+IF(${CMAKE_BUILD_TYPE} STREQUAL "RELEASE")
-+	ADD_DEFINITIONS(-DQT_NO_DEBUG)
-+	ADD_DEFINITIONS(-DQT_NO_DEBUG_OUTPUT)
-+	ADD_DEFINITIONS(-DQT_NO_WARNING_OUTPUT)
++   INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.json DESTINATION share/AusweisApp2 COMPONENT Runtime)
 +ENDIF()
 +
- IF(DESKTOP)
- 	SET(CMAKE_AUTOUIC ON)
++
+diff -upNr AusweisApp2-1.18.2.orig/cmake/Libraries.cmake AusweisApp2-1.18.2.patched/cmake/Libraries.cmake
+--- AusweisApp2-1.18.2.orig/cmake/Libraries.cmake	2019-09-30 17:25:27.000000000 +0200
++++ AusweisApp2-1.18.2.patched/cmake/Libraries.cmake	2019-11-20 16:47:39.045751651 +0100
+@@ -37,11 +37,13 @@ IF(ANDROID)
  ENDIF()
-diff -upNr AusweisApp2-1.16.2.orig/resources/packaging/linux/AusweisApp2.desktop.in AusweisApp2-1.16.2.patched/resources/packaging/linux/AusweisApp2.desktop.in
---- AusweisApp2-1.16.2.orig/resources/packaging/linux/AusweisApp2.desktop.in	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/resources/packaging/linux/AusweisApp2.desktop.in	2019-05-22 14:11:35.701115210 +0200
-@@ -2,7 +2,7 @@
- Version=1.0
- Type=Application
- Exec=@CMAKE_INSTALL_PREFIX@/bin/AusweisApp2
--Icon=AusweisApp2
-+Icon=npa
- StartupNotify=true
- Terminal=false
- Categories=Utility;Accessibility;
-diff -upNr AusweisApp2-1.16.2.orig/src/card/base/command/BaseCardCommand.cpp AusweisApp2-1.16.2.patched/src/card/base/command/BaseCardCommand.cpp
---- AusweisApp2-1.16.2.orig/src/card/base/command/BaseCardCommand.cpp	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/card/base/command/BaseCardCommand.cpp	2019-05-22 14:12:35.653024618 +0200
-@@ -45,7 +45,10 @@ void BaseCardCommand::execute()
- 	Q_ASSERT(QObject::thread() == QThread::currentThread());
  
- 	internalExecute();
--	qCDebug(card) << metaObject()->className() << "| ReturnCode of internal execute:" << mReturnCode;
-+	
-+	#ifndef QT_NO_DEBUG_OUTPUT
-+		qCDebug(card) << metaObject()->className() << "| ReturnCode of internal execute:" << mReturnCode;
-+	#endif // QT_NO_DEBUG_OUTPUT
+ SET(QT_HOST_PREFIX ${_qt5Core_install_prefix})
+-FOREACH(dest "" "share/qt" "share/qt5")
+-	IF(EXISTS "${QT_HOST_PREFIX}/${dest}/translations")
+-		SET(QT_TRANSLATIONS_DIR ${QT_HOST_PREFIX}/${dest}/translations)
+-	ENDIF()
+-ENDFOREACH()
++#FOREACH(dest "" "share/qt" "share/qt5")
++#	IF(EXISTS "${QT_HOST_PREFIX}/${dest}/translations")
++#		SET(QT_TRANSLATIONS_DIR ${QT_HOST_PREFIX}/${dest}/translations)
++#	ENDIF()
++#ENDFOREACH()
++SET(QT_TRANSLATIONS_DIR QT_HOST_PREFIX}/share/qt5/translations)
++
  
- 	// A "Command" is created by CardConnection::call() in Main-Thread and moved to ReaderManager-Thread.
- 	// The internal execution of a command will be self-sufficient until it has finished. After the
-diff -upNr AusweisApp2-1.16.2.orig/src/core/states/StateUpdateRetryCounter.cpp AusweisApp2-1.16.2.patched/src/core/states/StateUpdateRetryCounter.cpp
---- AusweisApp2-1.16.2.orig/src/core/states/StateUpdateRetryCounter.cpp	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/core/states/StateUpdateRetryCounter.cpp	2019-05-22 14:14:31.664320995 +0200
-@@ -24,7 +24,9 @@ void StateUpdateRetryCounter::run()
- 	auto cardConnection = getContext()->getCardConnection();
- 	if (!cardConnection)
- 	{
--		qCDebug(statemachine) << "No card connection available.";
-+		#ifndef QT_NO_DEBUG_OUTPUT
-+			qCDebug(statemachine) << "No card connection available.";
-+		#endif // QT_NO_DEBUG_OUTPUT
- 		Q_EMIT fireAbort();
- 		return;
- 	}
-@@ -36,7 +38,9 @@ void StateUpdateRetryCounter::run()
- 
- void StateUpdateRetryCounter::onUpdateRetryCounterDone(QSharedPointer<BaseCardCommand> pCommand)
- {
--	qCDebug(statemachine) << "StateUpdateRetryCounter::onUpdateRetryCounterDone()";
-+	#ifndef QT_NO_DEBUG_OUTPUT
-+		qCDebug(statemachine) << "StateUpdateRetryCounter::onUpdateRetryCounterDone()";
-+	#endif // QT_NO_DEBUG_OUTPUT
- 
- 	if (pCommand->getReturnCode() != CardReturnCode::OK)
- 	{
-diff -upNr AusweisApp2-1.16.2.orig/src/global/FileDestination.h AusweisApp2-1.16.2.patched/src/global/FileDestination.h
---- AusweisApp2-1.16.2.orig/src/global/FileDestination.h	2019-05-15 09:08:33.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/global/FileDestination.h	2019-05-22 14:11:35.705115203 +0200
-@@ -47,6 +47,23 @@ class FileDestination
+ IF(NOT QT_TRANSLATIONS_DIR)
+ 	QUERY_QMAKE(QT_TRANSLATIONS_DIR QT_INSTALL_TRANSLATIONS)
+diff -upNr AusweisApp2-1.18.2.orig/src/global/FileDestination.h AusweisApp2-1.18.2.patched/src/global/FileDestination.h
+--- AusweisApp2-1.18.2.orig/src/global/FileDestination.h	2019-09-30 17:25:27.000000000 +0200
++++ AusweisApp2-1.18.2.patched/src/global/FileDestination.h	2019-11-20 16:50:29.593973453 +0100
+@@ -41,6 +41,23 @@ class FileDestination
  		}
  
  
@@ -156,9 +120,9 @@ diff -upNr AusweisApp2-1.16.2.orig/src/global/FileDestination.h AusweisApp2-1.16
  };
  
  } // namespace governikus
-diff -upNr AusweisApp2-1.16.2.orig/src/global/LanguageLoader.cpp AusweisApp2-1.16.2.patched/src/global/LanguageLoader.cpp
---- AusweisApp2-1.16.2.orig/src/global/LanguageLoader.cpp	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/global/LanguageLoader.cpp	2019-05-22 14:11:35.705115203 +0200
+diff -upNr AusweisApp2-1.18.2.orig/src/global/LanguageLoader.cpp AusweisApp2-1.18.2.patched/src/global/LanguageLoader.cpp
+--- AusweisApp2-1.18.2.orig/src/global/LanguageLoader.cpp	2019-09-30 17:25:27.000000000 +0200
++++ AusweisApp2-1.18.2.patched/src/global/LanguageLoader.cpp	2019-11-20 16:50:29.593973453 +0100
 @@ -23,7 +23,7 @@ const QLocale::Language LanguageLoader::
  QLocale LanguageLoader::mDefaultLanguage = QLocale::system();
  
@@ -176,9 +140,9 @@ diff -upNr AusweisApp2-1.16.2.orig/src/global/LanguageLoader.cpp AusweisApp2-1.1
  }
  
  
-diff -upNr AusweisApp2-1.16.2.orig/src/global/ResourceLoader.cpp AusweisApp2-1.16.2.patched/src/global/ResourceLoader.cpp
---- AusweisApp2-1.16.2.orig/src/global/ResourceLoader.cpp	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/global/ResourceLoader.cpp	2019-05-22 14:11:35.705115203 +0200
+diff -upNr AusweisApp2-1.18.2.orig/src/global/ResourceLoader.cpp AusweisApp2-1.18.2.patched/src/global/ResourceLoader.cpp
+--- AusweisApp2-1.18.2.orig/src/global/ResourceLoader.cpp	2019-09-30 17:25:27.000000000 +0200
++++ AusweisApp2-1.18.2.patched/src/global/ResourceLoader.cpp	2019-11-20 16:50:29.597973460 +0100
 @@ -42,7 +42,7 @@ void ResourceLoader::init()
  {
  	for (const auto& file : mFilenames)
@@ -188,9 +152,9 @@ diff -upNr AusweisApp2-1.16.2.orig/src/global/ResourceLoader.cpp AusweisApp2-1.1
  
  #ifndef QT_NO_DEBUG
  		const auto& filePathFromTestDir = QCoreApplication::applicationDirPath() + QStringLiteral("/../../src/") + file;
-diff -upNr AusweisApp2-1.16.2.orig/src/secure_storage/SecureStorage.cpp AusweisApp2-1.16.2.patched/src/secure_storage/SecureStorage.cpp
---- AusweisApp2-1.16.2.orig/src/secure_storage/SecureStorage.cpp	2019-05-15 09:08:33.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/secure_storage/SecureStorage.cpp	2019-05-22 14:11:35.705115203 +0200
+diff -upNr AusweisApp2-1.18.2.orig/src/secure_storage/SecureStorage.cpp AusweisApp2-1.18.2.patched/src/secure_storage/SecureStorage.cpp
+--- AusweisApp2-1.18.2.orig/src/secure_storage/SecureStorage.cpp	2019-09-30 17:25:27.000000000 +0200
++++ AusweisApp2-1.18.2.patched/src/secure_storage/SecureStorage.cpp	2019-11-20 16:50:29.597973460 +0100
 @@ -95,7 +95,8 @@ SecureStorage& SecureStorage::getInstanc
  
  void SecureStorage::load()
@@ -201,52 +165,3 @@ diff -upNr AusweisApp2-1.16.2.orig/src/secure_storage/SecureStorage.cpp AusweisA
  
  	if (!QFile::exists(path))
  	{
-diff -upNr AusweisApp2-1.16.2.orig/src/ui/aidl/UIPlugInAidl.cpp AusweisApp2-1.16.2.patched/src/ui/aidl/UIPlugInAidl.cpp
---- AusweisApp2-1.16.2.orig/src/ui/aidl/UIPlugInAidl.cpp	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/ui/aidl/UIPlugInAidl.cpp	2019-05-22 14:15:59.067810423 +0200
-@@ -46,10 +46,12 @@ UIPlugInAidl::UIPlugInAidl()
- 		mJsonApi->setEnabled();
- 		mInitializationSuccessfull = true;
- 	}
-+	#ifndef QT_NO_WARNING_OUTPUT
- 	else
- 	{
- 		qCWarning(aidl) << "Cannot start AIDL because JSON-API is missing";
- 	}
-+	#endif // QT_NO_WARNING_OUTPUT
- 
- 	instance = this;
- }
-diff -upNr AusweisApp2-1.16.2.orig/src/ui/common/TrayIcon.cpp AusweisApp2-1.16.2.patched/src/ui/common/TrayIcon.cpp
---- AusweisApp2-1.16.2.orig/src/ui/common/TrayIcon.cpp	2019-05-15 09:08:32.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/ui/common/TrayIcon.cpp	2019-05-22 14:11:35.705115203 +0200
-@@ -70,12 +70,11 @@ void TrayIcon::create()
- 
- 	const auto trayIconMenu = new QMenu(nullptr);
- 
--#if defined(Q_OS_MACOS)
-+
- 	QAction* showApplicationAction = new QAction(tr("Open"), trayIconMenu);
- 	connect(showApplicationAction, &QAction::triggered, this, &TrayIcon::fireShow);
- 	trayIconMenu->addAction(showApplicationAction);
- 	trayIconMenu->addSeparator();
--#endif
- 
- 	const auto quitAction = new QAction(tr("Exit AusweisApp2"), trayIconMenu);
- 	connect(quitAction, &QAction::triggered, this, &TrayIcon::fireQuit);
-diff -upNr AusweisApp2-1.16.2.orig/src/ui/jsonapi/MessageDispatcher.cpp AusweisApp2-1.16.2.patched/src/ui/jsonapi/MessageDispatcher.cpp
---- AusweisApp2-1.16.2.orig/src/ui/jsonapi/MessageDispatcher.cpp	2019-05-15 09:08:33.000000000 +0200
-+++ AusweisApp2-1.16.2.patched/src/ui/jsonapi/MessageDispatcher.cpp	2019-05-22 14:17:34.851304639 +0200
-@@ -143,7 +143,11 @@ MsgHandler MessageDispatcher::createForC
- 	}
- 
- 	auto requestType = Enum<MsgCmdType>::fromString(cmd, MsgCmdType::UNDEFINED);
--	qCDebug(jsonapi) << "Process type:" << requestType;
-+
-+	#ifndef QT_NO_DEBUG_OUTPUT
-+		qDebug(jsonapi) << "Process type:" << requestType;
-+	#endif // QT_NO_DEBUG_OUTPUT
-+
- 	switch (requestType)
- 	{
- 		case MsgCmdType::UNDEFINED:

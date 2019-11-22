@@ -1,5 +1,5 @@
 name: ausweisapp2-ce
-version: '1.16.2'
+version: '1.18.2'
 base: core18
 summary: AusweisApp2-CE - Tool for the german nPA (Community Edition)
 description: |
@@ -45,7 +45,7 @@ apps:
 
   ausweisapp2-ce:
     adapter: full
-    command: usr/bin/AusweisApp2 -style fusion
+    command: usr/bin/AusweisApp2 --no-loghandler
     command-chain:
       - bin/desktop-launch
       - bin/gtk3-env-launch
@@ -144,15 +144,15 @@ parts:
       echo "deb http://archive.neon.kde.org/user bionic main" | tee /etc/apt/sources.list.d/kde-neon.list
       wget -O - https://archive.neon.kde.org/public.key | apt-key add - 
       apt update
-      apt install -yy qtbase5-dev libqt5websockets5-dev qtconnectivity5-dev qtdeclarative5-dev qtquickcontrols2-5-dev libssl-dev libpcsclite-dev libqt5svg5 libqt5websockets5 libqt5xml5
+      apt install --no-install-recommends -yy qtbase5-dev libqt5websockets5-dev qtconnectivity5-dev qtdeclarative5-dev qtquickcontrols2-5-dev libssl-dev libpcsclite-dev libqt5svg5 libqt5websockets5 libqt5xml5
     build-packages:
       - wget
 
 
   desktop-qt5:
     build-packages:
-    - qtbase5-dev
-    - dpkg-dev
+      - qtbase5-dev
+      - dpkg-dev
     make-parameters:
     - FLAVOR=qt5
     plugin: make
@@ -170,16 +170,16 @@ parts:
 
 
   patches:
-      source: patches
-      plugin: dump
-      prime: [-*]
+    source: patches
+    plugin: dump
+    prime: [-*]
 
 
   ausweisapp2:
       plugin: cmake
       configflags: [-DCMAKE_BUILD_TYPE=RELEASE, -DCMAKE_INSTALL_PREFIX=/usr/]
       source-type: tar
-      source: https://github.com/Governikus/AusweisApp2/releases/download/1.16.2/AusweisApp2-1.16.2.tar.gz
+      source: https://github.com/Governikus/AusweisApp2/archive/1.18.2.tar.gz
       build-packages:
         - cmake
         - file
@@ -212,5 +212,5 @@ parts:
 
       override-build: |
         snapcraftctl build
-        rm ${SNAPCRAFT_PART_INSTALL}/usr/bin/X11 ${SNAPCRAFT_PART_INSTALL}/usr/bin/fc* ${SNAPCRAFT_PART_INSTALL}/usr/bin/lib* ${SNAPCRAFT_PART_INSTALL}/usr/bin/uc* ${SNAPCRAFT_PART_INSTALL}/usr/bin/lcf
+        #rm ${SNAPCRAFT_PART_INSTALL}/usr/bin/X11 ${SNAPCRAFT_PART_INSTALL}/usr/bin/fc* ${SNAPCRAFT_PART_INSTALL}/usr/bin/lib* ${SNAPCRAFT_PART_INSTALL}/usr/bin/uc* ${SNAPCRAFT_PART_INSTALL}/usr/bin/lcf
         strip ${SNAPCRAFT_PART_INSTALL}/usr/bin/AusweisApp2
