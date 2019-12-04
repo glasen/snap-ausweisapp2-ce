@@ -1,6 +1,6 @@
 diff -upNr AusweisApp2-1.18.2.orig/cmake/Install.cmake AusweisApp2-1.18.2.patched/cmake/Install.cmake
 --- AusweisApp2-1.18.2.orig/cmake/Install.cmake	2019-09-30 17:25:27.000000000 +0200
-+++ AusweisApp2-1.18.2.patched/cmake/Install.cmake	2019-11-20 19:14:16.464539619 +0100
++++ AusweisApp2-1.18.2.patched/cmake/Install.cmake	2019-11-22 18:26:06.399025247 +0100
 @@ -3,7 +3,7 @@
  # It will be included by ./src/CMakeLists.txt
  ################################################
@@ -73,7 +73,7 @@ diff -upNr AusweisApp2-1.18.2.orig/cmake/Install.cmake AusweisApp2-1.18.2.patche
 +
 diff -upNr AusweisApp2-1.18.2.orig/cmake/Libraries.cmake AusweisApp2-1.18.2.patched/cmake/Libraries.cmake
 --- AusweisApp2-1.18.2.orig/cmake/Libraries.cmake	2019-09-30 17:25:27.000000000 +0200
-+++ AusweisApp2-1.18.2.patched/cmake/Libraries.cmake	2019-11-20 16:47:39.045751651 +0100
++++ AusweisApp2-1.18.2.patched/cmake/Libraries.cmake	2019-11-22 18:26:06.399025247 +0100
 @@ -37,11 +37,13 @@ IF(ANDROID)
  ENDIF()
  
@@ -95,7 +95,7 @@ diff -upNr AusweisApp2-1.18.2.orig/cmake/Libraries.cmake AusweisApp2-1.18.2.patc
  	QUERY_QMAKE(QT_TRANSLATIONS_DIR QT_INSTALL_TRANSLATIONS)
 diff -upNr AusweisApp2-1.18.2.orig/src/global/FileDestination.h AusweisApp2-1.18.2.patched/src/global/FileDestination.h
 --- AusweisApp2-1.18.2.orig/src/global/FileDestination.h	2019-09-30 17:25:27.000000000 +0200
-+++ AusweisApp2-1.18.2.patched/src/global/FileDestination.h	2019-11-20 16:50:29.593973453 +0100
++++ AusweisApp2-1.18.2.patched/src/global/FileDestination.h	2019-11-22 18:26:06.403025253 +0100
 @@ -41,6 +41,23 @@ class FileDestination
  		}
  
@@ -122,7 +122,7 @@ diff -upNr AusweisApp2-1.18.2.orig/src/global/FileDestination.h AusweisApp2-1.18
  } // namespace governikus
 diff -upNr AusweisApp2-1.18.2.orig/src/global/LanguageLoader.cpp AusweisApp2-1.18.2.patched/src/global/LanguageLoader.cpp
 --- AusweisApp2-1.18.2.orig/src/global/LanguageLoader.cpp	2019-09-30 17:25:27.000000000 +0200
-+++ AusweisApp2-1.18.2.patched/src/global/LanguageLoader.cpp	2019-11-20 16:50:29.593973453 +0100
++++ AusweisApp2-1.18.2.patched/src/global/LanguageLoader.cpp	2019-11-22 18:26:06.403025253 +0100
 @@ -23,7 +23,7 @@ const QLocale::Language LanguageLoader::
  QLocale LanguageLoader::mDefaultLanguage = QLocale::system();
  
@@ -142,7 +142,7 @@ diff -upNr AusweisApp2-1.18.2.orig/src/global/LanguageLoader.cpp AusweisApp2-1.1
  
 diff -upNr AusweisApp2-1.18.2.orig/src/global/ResourceLoader.cpp AusweisApp2-1.18.2.patched/src/global/ResourceLoader.cpp
 --- AusweisApp2-1.18.2.orig/src/global/ResourceLoader.cpp	2019-09-30 17:25:27.000000000 +0200
-+++ AusweisApp2-1.18.2.patched/src/global/ResourceLoader.cpp	2019-11-20 16:50:29.597973460 +0100
++++ AusweisApp2-1.18.2.patched/src/global/ResourceLoader.cpp	2019-11-22 18:26:06.403025253 +0100
 @@ -42,7 +42,7 @@ void ResourceLoader::init()
  {
  	for (const auto& file : mFilenames)
@@ -154,7 +154,7 @@ diff -upNr AusweisApp2-1.18.2.orig/src/global/ResourceLoader.cpp AusweisApp2-1.1
  		const auto& filePathFromTestDir = QCoreApplication::applicationDirPath() + QStringLiteral("/../../src/") + file;
 diff -upNr AusweisApp2-1.18.2.orig/src/secure_storage/SecureStorage.cpp AusweisApp2-1.18.2.patched/src/secure_storage/SecureStorage.cpp
 --- AusweisApp2-1.18.2.orig/src/secure_storage/SecureStorage.cpp	2019-09-30 17:25:27.000000000 +0200
-+++ AusweisApp2-1.18.2.patched/src/secure_storage/SecureStorage.cpp	2019-11-20 16:50:29.597973460 +0100
++++ AusweisApp2-1.18.2.patched/src/secure_storage/SecureStorage.cpp	2019-11-22 18:26:06.403025253 +0100
 @@ -95,7 +95,8 @@ SecureStorage& SecureStorage::getInstanc
  
  void SecureStorage::load()
@@ -165,3 +165,47 @@ diff -upNr AusweisApp2-1.18.2.orig/src/secure_storage/SecureStorage.cpp AusweisA
  
  	if (!QFile::exists(path))
  	{
+diff -upNr AusweisApp2-1.18.2.orig/src/ui/widget/GeneralSettingsWidget.cpp AusweisApp2-1.18.2.patched/src/ui/widget/GeneralSettingsWidget.cpp
+--- AusweisApp2-1.18.2.orig/src/ui/widget/GeneralSettingsWidget.cpp	2019-09-30 17:25:27.000000000 +0200
++++ AusweisApp2-1.18.2.patched/src/ui/widget/GeneralSettingsWidget.cpp	2019-12-04 21:46:50.665631120 +0100
+@@ -30,7 +30,7 @@ GeneralSettingsWidget::GeneralSettingsWi
+ 		qCInfo(settings) << "Auto start is enabled system wide";
+ 		mUi->autostartCheckBox->setEnabled(false);
+ 	}
+-	if (generalSettings.autoUpdateCheckIsSetByAdmin())
++	if (true)
+ 	{
+ 		qCInfo(settings) << "Auto update check is configured system wide";
+ 		mUi->regularlyUpdateCheckBox->setEnabled(false);
+@@ -42,8 +42,8 @@ GeneralSettingsWidget::GeneralSettingsWi
+ 	connect(mUi->regularlyUpdateCheckBox, &QCheckBox::stateChanged, this, &GeneralSettingsWidget::onCheckBoxStateChanged);
+ 	connect(mUi->closeWindowCheckBox, &QCheckBox::stateChanged, this, &GeneralSettingsWidget::onCheckBoxStateChanged);
+ 	connect(mUi->saveHistoryCheckBox, &QCheckBox::stateChanged, this, &GeneralSettingsWidget::onCheckBoxStateChanged);
+-	connect(mUi->updateCheckButton, &QPushButton::clicked, this, &GeneralSettingsWidget::onUpdateCheckButtonClicked);
+-	connect(mUi->switchToBetaUiButton, &QPushButton::clicked, this, &GeneralSettingsWidget::fireSwitchUiRequested);
++	//connect(mUi->updateCheckButton, &QPushButton::clicked, this, &GeneralSettingsWidget::onUpdateCheckButtonClicked);
++	//connect(mUi->switchToBetaUiButton, &QPushButton::clicked, this, &GeneralSettingsWidget::fireSwitchUiRequested);
+ 	connect(mUi->keylessPasswordCheckBox, &QCheckBox::stateChanged, this, &GeneralSettingsWidget::onCheckBoxStateChanged);
+ }
+ 
+diff -upNr AusweisApp2-1.18.2.orig/src/ui/widget/GeneralSettingsWidget.ui AusweisApp2-1.18.2.patched/src/ui/widget/GeneralSettingsWidget.ui
+--- AusweisApp2-1.18.2.orig/src/ui/widget/GeneralSettingsWidget.ui	2019-09-30 17:25:27.000000000 +0200
++++ AusweisApp2-1.18.2.patched/src/ui/widget/GeneralSettingsWidget.ui	2019-11-22 18:26:06.403025253 +0100
+@@ -194,7 +194,7 @@
+         </property>
+        </widget>
+       </item>
+-      <item row="10" column="0" colspan="2">
++      <!--<item row="10" column="0" colspan="2">
+        <widget class="Line" name="line4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+@@ -239,7 +239,7 @@
+          </size>
+         </property>
+        </spacer>
+-      </item>
++      </item> -->
+      </layout>
+     </widget>
+    </item>
