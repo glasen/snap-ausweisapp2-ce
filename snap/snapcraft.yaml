@@ -82,7 +82,7 @@ parts:
       - --enable-usbdropdir=/snap/ausweisapp2-ce/current/usr/lib/pcsc/drivers
       - --enable-ipcdir=/run/snap.ausweisapp2-ce
     source-type: tar
-    source: https://pcsclite.apdu.fr/files/pcsc-lite-1.8.25.tar.bz2
+    source: https://pcsclite.apdu.fr/files/pcsc-lite-1.8.26.tar.bz2
     build-packages:
       - gcc
       - pkg-config
@@ -179,7 +179,7 @@ parts:
       plugin: cmake
       configflags: [-DCMAKE_BUILD_TYPE=RELEASE, -DCMAKE_INSTALL_PREFIX=/usr/]
       source-type: tar
-      source: https://github.com/Governikus/AusweisApp2/archive/1.18.2.tar.gz
+      source: https://github.com/Governikus/AusweisApp2/archive/1.20.0.tar.gz
       build-packages:
         - cmake
         - file
@@ -203,12 +203,18 @@ parts:
         - libhttp-parser-dev
         - qtwayland5
         - qt5-gtk-platformtheme
+        - qml-module-qt-labs-platform
+        - qml-module-qtquick-controls
+        - qml-module-qtquick-controls2
+        - qml-module-qtqml-models2
+        - qml-module-qtgraphicaleffects
 
       after: [desktop-qt5, qt5, patches]
 
       override-pull: |
         snapcraftctl pull
-        patch -p1 < "${SNAPCRAFT_STAGE}/AusweisApp2-snapcraft.patch"
+        patch -p1 < "${SNAPCRAFT_STAGE}/0001-Disable-vendor-name.patch"
+        patch -p1 < "${SNAPCRAFT_STAGE}/0002-Fix-desktop-icon-path.patch"
 
       override-build: |
         snapcraftctl build

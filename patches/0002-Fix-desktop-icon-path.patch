@@ -1,0 +1,21 @@
+From: John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
+Date: Fri, 17 Jan 2020 19:34:23 +0100
+Subject: Fix desktop icon path
+
+---
+ resources/packaging/linux/com.governikus.ausweisapp2.desktop.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/resources/packaging/linux/com.governikus.ausweisapp2.desktop.in b/resources/packaging/linux/com.governikus.ausweisapp2.desktop.in
+index 998c6c7..2055690 100644
+--- a/resources/packaging/linux/com.governikus.ausweisapp2.desktop.in
++++ b/resources/packaging/linux/com.governikus.ausweisapp2.desktop.in
+@@ -2,7 +2,7 @@
+ Version=1.0
+ Type=Application
+ Exec=@CMAKE_INSTALL_FULL_BINDIR@/AusweisApp2
+-Icon=@CMAKE_INSTALL_FULL_DATADIR@/@VENDOR@/AusweisApp2/npa.svg
++Icon=AusweisApp2
+ StartupNotify=true
+ Terminal=false
+ Categories=Utility;Accessibility;
