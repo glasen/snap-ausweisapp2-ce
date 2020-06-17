@@ -120,7 +120,7 @@ parts:
     configflags:
       - --prefix=/usr
       - --with-usbdropdir=/snap/ausweisapp2-ce/current/usr/lib/pcsc/drivers
-    source: http://support.reiner-sct.de/downloads/LINUX/V3.99.5_SP13/pcsc-cyberjack_3.99.5final.SP14.tar.gz
+    source: http://support.reiner-sct.de/downloads/LINUX/V3.99.5_SP14/pcsc-cyberjack_3.99.5final.SP14.tar.gz
     build-packages:
       - pkg-config
       - libusb-1.0-0-dev
