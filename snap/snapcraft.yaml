@@ -1,5 +1,5 @@
 name: ausweisapp2-ce
-version: '1.20.0'
+version: '1.20.1'
 base: core18
 summary: AusweisApp2-CE - Tool for the german nPA (Community Edition)
 description: |
@@ -179,7 +179,7 @@ parts:
       plugin: cmake
       configflags: [-DCMAKE_BUILD_TYPE=RELEASE, -DCMAKE_INSTALL_PREFIX=/usr/]
       source-type: tar
-      source: https://github.com/Governikus/AusweisApp2/archive/1.20.0.tar.gz
+      source: https://github.com/Governikus/AusweisApp2/archive/1.20.1.tar.gz
       build-packages:
         - cmake
         - file
