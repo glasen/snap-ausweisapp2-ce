@@ -1,6 +1,6 @@
 name: ausweisapp2-ce
 version: '1.20.1'
-base: core18
+base: core20
 summary: AusweisApp2-CE - Tool for the german nPA (Community Edition)
 description: |
   The AusweisApp2 (since November 2014 successor of the AusweisApp) is a free application software for the PC to use electronic authentication via the Internet with the new German identity card and the electronic residence permit or their online identification function. This makes it possible for citizens in Germany to identify themselves easily and securely on the Internet - for example, to deal with administrative formalities online.
@@ -77,7 +77,7 @@ parts:
 
   pcsc-lite:
     plugin: autotools
-    configflags:
+    autotools-configure-parameters:
       - --prefix=/snap/ausweisapp2-ce/current/usr
       - --enable-usbdropdir=/snap/ausweisapp2-ce/current/usr/lib/pcsc/drivers
       - --enable-ipcdir=/run/snap.ausweisapp2-ce
@@ -98,7 +98,7 @@ parts:
   ccid:
     plugin: autotools
     source-type: tar
-    configflags:
+    autotools-configure-parameters:
       - --prefix=/usr
       - --enable-usbdropdir=/snap/ausweisapp2-ce/current/usr/lib/pcsc/drivers
     source: https://ccid.apdu.fr/files/ccid-1.4.32.tar.bz2
@@ -117,7 +117,7 @@ parts:
   reiner-sct-drivers:
     plugin: autotools
     source-type: tar
-    configflags:
+    autotools-configure-parameters:
       - --prefix=/usr
       - --with-usbdropdir=/snap/ausweisapp2-ce/current/usr/lib/pcsc/drivers
     source: http://support.reiner-sct.de/downloads/LINUX/V3.99.5_SP14/pcsc-cyberjack_3.99.5final.SP14.tar.gz
@@ -137,18 +137,6 @@ parts:
     after: [pcsc-lite]
 
 
-  qt5:
-    plugin: nil
-    prime: [-*]
-    override-build: |
-      echo "deb http://archive.neon.kde.org/user bionic main" | tee /etc/apt/sources.list.d/kde-neon.list
-      wget -O - https://archive.neon.kde.org/public.key | apt-key add - 
-      apt update
-      apt install --no-install-recommends -yy qtbase5-dev libqt5websockets5-dev qtconnectivity5-dev qtdeclarative5-dev qtquickcontrols2-5-dev libssl-dev libpcsclite-dev libqt5svg5 libqt5websockets5 libqt5xml5
-    build-packages:
-      - wget
-
-
   desktop-qt5:
     build-packages:
       - qtbase5-dev
@@ -158,7 +146,6 @@ parts:
     plugin: make
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
     source-subdir: qt
-    after: [qt5]
     stage-packages:
     - libxkbcommon0
     - ttf-ubuntu-font-family
@@ -177,7 +164,7 @@ parts:
 
   ausweisapp2:
       plugin: cmake
-      configflags: [-DCMAKE_BUILD_TYPE=RELEASE, -DCMAKE_INSTALL_PREFIX=/usr/]
+      cmake-parameters: [-DCMAKE_BUILD_TYPE=RELEASE, -DCMAKE_INSTALL_PREFIX=/usr/]
       source-type: tar
       source: https://github.com/Governikus/AusweisApp2/archive/1.20.1.tar.gz
       build-packages:
@@ -209,7 +196,7 @@ parts:
         - qml-module-qtqml-models2
         - qml-module-qtgraphicaleffects
 
-      after: [desktop-qt5, qt5, patches]
+      after: [desktop-qt5, patches]
 
       override-pull: |
         snapcraftctl pull
@@ -217,5 +204,4 @@ parts:
 
       override-build: |
         snapcraftctl build
-        #rm ${SNAPCRAFT_PART_INSTALL}/usr/bin/X11 ${SNAPCRAFT_PART_INSTALL}/usr/bin/fc* ${SNAPCRAFT_PART_INSTALL}/usr/bin/lib* ${SNAPCRAFT_PART_INSTALL}/usr/bin/uc* ${SNAPCRAFT_PART_INSTALL}/usr/bin/lcf
         strip ${SNAPCRAFT_PART_INSTALL}/usr/bin/AusweisApp2
