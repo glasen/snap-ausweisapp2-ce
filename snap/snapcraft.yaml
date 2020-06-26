@@ -214,7 +214,6 @@ parts:
       override-pull: |
         snapcraftctl pull
         patch -p1 < "${SNAPCRAFT_STAGE}/0001-Disable-vendor-name.patch"
-        patch -p1 < "${SNAPCRAFT_STAGE}/0002-Fix-desktop-icon-path.patch"
 
       override-build: |
         snapcraftctl build
