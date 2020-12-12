@@ -1,5 +1,5 @@
 name: ausweisapp2-ce
-version: '1.20.1'
+version: '1.22.0'
 base: core20
 summary: AusweisApp2-CE - Tool for the german nPA (Community Edition)
 description: |
@@ -156,17 +156,11 @@ parts:
     - locales-all
 
 
-  patches:
-    source: patches
-    plugin: dump
-    prime: [-*]
-
-
   ausweisapp2:
       plugin: cmake
       cmake-parameters: [-DCMAKE_BUILD_TYPE=RELEASE, -DCMAKE_INSTALL_PREFIX=/usr/]
       source-type: tar
-      source: https://github.com/Governikus/AusweisApp2/archive/1.20.1.tar.gz
+      source: https://github.com/Governikus/AusweisApp2/archive/1.22.0.tar.gz
       build-packages:
         - cmake
         - file
@@ -196,12 +190,4 @@ parts:
         - qml-module-qtqml-models2
         - qml-module-qtgraphicaleffects
 
-      after: [desktop-qt5, patches]
-
-      override-pull: |
-        snapcraftctl pull
-        patch -p1 < "${SNAPCRAFT_STAGE}/0001-Disable-vendor-name.patch"
-
-      override-build: |
-        snapcraftctl build
-        strip ${SNAPCRAFT_PART_INSTALL}/usr/bin/AusweisApp2
+      after: [desktop-qt5]
